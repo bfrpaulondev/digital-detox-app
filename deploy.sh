@@ -1,63 +1,83 @@
 #!/bin/bash
 # ============================================
-# DEPLOY SCRIPT - Digital Detox App na Vercel
+# DEPLOY COMPLETO - Digital Detox App
 # ============================================
-# 
-# PRÉ-REQUISITOS:
-# 1. Ter a Vercel CLI instalada: npm i -g vercel
-# 2. Estar logado na Vercel: vercel login
-# 3. Ter MongoDB Atlas com URI pronta
-# 4. Ter OpenAI API Key
-# 5. (Opcional) Ter Cloudinary configurado
-#
+# Execute este script no terminal do seu computador:
+#   bash deploy.sh
 # ============================================
 
 set -e
 
-echo "🚀 Digital Detox - Deploy na Vercel"
-echo "===================================="
+echo ""
+echo "============================================"
+echo "   Digital Detox - Deploy Automático"
+echo "============================================"
 echo ""
 
-# Check if vercel is installed
+# Check Vercel CLI
 if ! command -v vercel &> /dev/null; then
-    echo "📦 A instalar Vercel CLI..."
-    npm install -g vercel
+  echo "📦 A instalar Vercel CLI..."
+  npm install -g vercel
 fi
 
-# Check if logged in
-echo "🔑 Verificando login na Vercel..."
-vercel whoami 2>/dev/null || {
-    echo "❌ Não está logado na Vercel. Execute: vercel login"
-    exit 1
-}
+# Step 1: Login
+echo ""
+echo "🔐 PASSO 1: Login na Vercel"
+echo "   (Abre o browser - faça login com GitHub)"
+vercel login
 
-echo "✅ Login verificado"
+# Step 2: Deploy
+echo ""
+echo "🚀 PASSO 2: Deploy para produção"
+echo "   (Cria o projeto na Vercel)"
+vercel --prod --yes
+
+# Step 3: Set environment variables
+echo ""
+echo "⚙️  PASSO 3: Configurar variáveis de ambiente..."
+echo "   (Serão pedidas interativamente)"
 echo ""
 
-# Deploy to production
-echo "🚀 Fazendo deploy para produção..."
+# MongoDB URI
+echo "📌 Definir MONGODB_URI..."
+vercel env add MONGODB_URI production
+
+# JWT Secret
+echo "📌 Definir JWT_SECRET..."
+vercel env add JWT_SECRET production
+
+# JWT Expires
+echo "📌 Definir JWT_EXPIRES_IN..."
+vercel env add JWT_EXPIRES_IN production <<< "7d"
+
+# OpenAI API Key
+echo "📌 Definir OPENAI_API_KEY..."
+vercel env add OPENAI_API_KEY production
+
+# Node Environment
+echo "📌 Definir NODE_ENV..."
+vercel env add NODE_ENV production <<< "production"
+
+# Cloudinary
+echo "📌 Definir CLOUDINARY_CLOUD_NAME..."
+vercel env add CLOUDINARY_CLOUD_NAME production
+
+echo "📌 Definir CLOUDINARY_API_KEY..."
+vercel env add CLOUDINARY_API_KEY production
+
+echo "📌 Definir CLOUDINARY_API_SECRET..."
+vercel env add CLOUDINARY_API_SECRET production
+
+# Step 4: Redeploy with env vars
+echo ""
+echo "🔄 PASSO 4: Re-deploy com variáveis configuradas..."
 vercel --prod --yes
 
 echo ""
-echo "✅ Deploy concluído!"
+echo "============================================"
+echo "   ✅ DEPLOY COMPLETADO!"
+echo "============================================"
 echo ""
-echo "📋 PRÓXIMOS PASSOS:"
-echo "1. Acesse https://vercel.com/dashboard"
-echo "2. Vá em Settings > Environment Variables"
-echo "3. Adicione as seguintes variáveis:"
+echo "🌐 A sua app está online!"
+echo "   Ver URL no output acima"
 echo ""
-echo "   MONGODB_URI = mongodb+srv://user:pass@cluster.mongodb.net/digital-detox"
-echo "   JWT_SECRET = sua_chave_secreta_super_segura_aqui"
-echo "   JWT_EXPIRES_IN = 7d"
-echo "   OPENAI_API_KEY = sk-sua-openai-api-key"
-echo "   NODE_ENV = production"
-echo ""
-echo "   (Opcional - para upload de fotos):"
-echo "   CLOUDINARY_CLOUD_NAME = seu_cloud_name"
-echo "   CLOUDINARY_API_KEY = sua_api_key"
-echo "   CLOUDINARY_API_SECRET = seu_api_secret"
-echo ""
-echo "4. Re-deploy: vercel --prod"
-echo ""
-echo "🌐 MongoDB Atlas (grátis): https://www.mongodb.com/atlas"
-echo "☁️  Cloudinary (grátis): https://cloudinary.com/users/register_free"
