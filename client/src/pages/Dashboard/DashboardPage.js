@@ -2,18 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Box, Typography, Card, CardContent, Grid, Chip, LinearProgress,
-  List, ListItem, ListItemIcon, ListItemText, ListItemButton,
-  Avatar, Divider, IconButton, Fab
+  List, ListItem, ListItemIcon, ListItemText,
+  Avatar
 } from '@mui/material';
 import {
   School as SchoolIcon,
   Pets as PetsIcon,
   NaturePeople as OutsideIcon,
-  Star as StarIcon,
-  TrendingUp as TrendingIcon,
   EmojiEvents as EmojiEventsIcon,
-  Notifications as NotificationsIcon,
-  Add as AddIcon,
   CameraAlt as CameraIcon
 } from '@mui/icons-material';
 import { useAuth } from '../../context/AuthContext';
@@ -31,11 +27,12 @@ const DashboardPage = () => {
 
   useEffect(() => {
     loadDashboard();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?._id]);
 
   const loadDashboard = async () => {
     try {
-      const [statsRes, activitiesRes] = await Promise.all([
+      const [statsRes] = await Promise.all([
         dashboardAPI.getStats(),
         activityAPI.getAll({ status: 'pendente', limit: 5 })
       ]);
@@ -169,7 +166,7 @@ const DashboardPage = () => {
                     <Typography variant="body2" color="text.secondary">{sug.description}</Typography>
                     <Box sx={{ display: 'flex', gap: 1, mt: 1 }}>
                       <Chip size="small" label={`${sug.estimatedMinutes || 30} min`} variant="outlined" />
-                      <Chip size="small" label={`${sug.pointsValue || 10} pts`} color="primary" size="small" />
+                      <Chip size="small" label={`${sug.pointsValue || 10} pts`} color="primary" />
                     </Box>
                   </Box>
                   <CameraIcon sx={{ color: 'text.secondary' }} />

@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import {
-  Box, Typography, List, ListItem, ListItemIcon, ListItemText,
-  ListItemButton, Divider, Chip, Button, Paper
+  Box, Typography, List, ListItemIcon, ListItemText,
+  ListItemButton, Button, Paper
 } from '@mui/material';
 import {
   School as SchoolIcon,
@@ -25,7 +24,6 @@ const iconMap = {
 };
 
 const NotificationsPage = () => {
-  const navigate = useNavigate();
   const [notifications, setNotifications] = useState([]);
   const [total, setTotal] = useState(0);
 

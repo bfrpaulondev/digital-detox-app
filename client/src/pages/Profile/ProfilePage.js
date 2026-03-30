@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import {
   Box, Typography, Card, CardContent, TextField, Button, Avatar,
-  Divider, Chip, List, ListItem, ListItemIcon, ListItemText, Grid
+  Chip, List, ListItem, ListItemIcon, ListItemText, Grid
 } from '@mui/material';
-import { Person, Email, CalendarToday, Phone, Star, Edit, Save } from '@mui/icons-material';
+import { Email, CalendarToday, Phone, Edit, Save } from '@mui/icons-material';
 import { useAuth } from '../../context/AuthContext';
 import AppHeader from '../../components/layout/AppHeader';
 import { userAPI } from '../../services/api';

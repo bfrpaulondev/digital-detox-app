@@ -1,18 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import {
   Box, Typography, List, ListItem, ListItemIcon, ListItemText,
-  Avatar, Chip, Paper, Divider, MenuItem, TextField, InputAdornment
+  Avatar, Paper, MenuItem, TextField
 } from '@mui/material';
-import { EmojiEvents, Search } from '@mui/icons-material';
+import { EmojiEvents } from '@mui/icons-material';
 import AppHeader from '../../components/layout/AppHeader';
 import { dashboardAPI } from '../../services/api';
-import { useAuth } from '../../context/AuthContext';
 
 const RankingPage = () => {
-  const { user } = useAuth();
   const [ranking, setRanking] = useState([]);
   const [grade, setGrade] = useState('');
-  const [loading, setLoading] = useState(true);
+  const [, setLoading] = useState(true);
 
   useEffect(() => {
     loadRanking();

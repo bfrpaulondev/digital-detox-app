@@ -1,17 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import {
   Box, Typography, Card, CardContent, Tabs, Tab, List, ListItem,
-  ListItemText, ListItemIcon, Chip, Button, TextField, Dialog,
-  DialogTitle, DialogContent, DialogActions, Avatar, Grid,
-  Checkbox, IconButton, Fab, LinearProgress, Paper, InputAdornment,
-  MenuItem
+  ListItemText, Chip, Button, TextField, Dialog,
+  DialogTitle, DialogContent, DialogActions, Avatar,
+  IconButton, Fab, Paper, InputAdornment, MenuItem
 } from '@mui/material';
 import {
   School as SchoolIcon,
   Assignment as AssignmentIcon,
   CheckCircle as CheckIcon,
   People as PeopleIcon,
-  Event as EventIcon,
   Add as AddIcon,
   Search as SearchIcon,
   Star as StarIcon,
@@ -26,7 +24,7 @@ const SchoolPage = () => {
   const [tab, setTab] = useState(0);
   const [activities, setActivities] = useState([]);
   const [students, setStudents] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [newActivity, setNewActivity] = useState({

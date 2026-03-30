@@ -1,12 +1,11 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { BottomNavigation, BottomNavigationAction, Paper, Box, Badge } from '@mui/material';
+import { BottomNavigation, BottomNavigationAction, Paper } from '@mui/material';
 import {
   Home as HomeIcon,
   School as SchoolIcon,
   Pets as PetsIcon,
-  NaturePeople as OutsideIcon,
-  Dashboard as DashboardIcon
+  NaturePeople as OutsideIcon
 } from '@mui/icons-material';
 import { useAuth } from '../../context/AuthContext';
 

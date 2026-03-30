@@ -1,17 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import {
   Box, Typography, Card, CardContent, Grid, Button, LinearProgress,
-  Chip, Dialog, DialogTitle, DialogContent, DialogActions, Avatar,
-  Paper, Slider, IconButton, TextField
+  Chip, Dialog, DialogTitle, DialogContent, DialogActions, Paper,
+  Slider, TextField
 } from '@mui/material';
 import {
   Pets as PetsIcon,
   Restaurant as FeedIcon,
-  Star as StarIcon,
-  Favorite as HeartIcon,
-  Bolt as EnergyIcon,
-  EmojiEmotions as MoodIcon,
-  Edit as EditIcon
+  Favorite as HeartIcon
 } from '@mui/icons-material';
 import { useAuth } from '../../context/AuthContext';
 import AppHeader from '../../components/layout/AppHeader';
@@ -28,11 +24,6 @@ const speciesData = {
 const moodEmojis = {
   feliz: '😊', triste: '😢', sonolento: '😴', energico: '⚡',
   com_fome: '😫', brincalhao: '😄'
-};
-
-const environmentLabels = {
-  padrao: 'Padrão', floresta: 'Floresta', praia: 'Praia',
-  montanha: 'Montanha', cidade: 'Cidade'
 };
 
 const PetPage = () => {

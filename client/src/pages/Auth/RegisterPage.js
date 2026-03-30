@@ -4,7 +4,7 @@ import {
   Container, Box, Typography, TextField, Button, Alert, Link,
   MenuItem, Stepper, Step, StepLabel, Paper, InputAdornment, IconButton, Chip
 } from '@mui/material';
-import { Visibility, VisibilityOff, School, Person, FamilyRestroom, Pets } from '@mui/icons-material';
+import { Visibility, VisibilityOff, School, Person, FamilyRestroom } from '@mui/icons-material';
 import { useAuth } from '../../context/AuthContext';
 import { schoolAPI } from '../../services/api';
 
@@ -181,7 +181,7 @@ const RegisterPage = () => {
                       display: 'flex',
                       alignItems: 'center',
                       gap: 2,
-                      bgcolor: formData.role === role.value ? 'primary.light' + '10' : 'transparent',
+                      bgcolor: formData.role === role.value ? 'primary.light10' : 'transparent',
                       transition: 'all 0.2s'
                     }}
                     elevation={0}

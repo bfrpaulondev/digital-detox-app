@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import {
-  Box, Typography, Card, CardContent, Tabs, Tab, List, ListItem,
-  ListItemText, Chip, Button, TextField, Avatar, Grid, Fab,
-  Dialog, DialogTitle, DialogContent, DialogActions, Paper,
-  InputAdornment, IconButton, LinearProgress
+  Box, Typography, Card, CardContent, Tabs, Tab,
+  Chip, Button, TextField, Dialog, DialogTitle, DialogContent,
+  DialogActions, Paper, InputAdornment, LinearProgress
 } from '@mui/material';
 import {
   NaturePeople as OutsideIcon,
@@ -22,8 +21,7 @@ import {
 import { useSnackbar } from 'notistack';
 import { useAuth } from '../../context/AuthContext';
 import AppHeader from '../../components/layout/AppHeader';
-import PetAvatar from '../../components/common/PetAvatar';
-import { activityAPI, aiAPI, photoAPI, dashboardAPI } from '../../services/api';
+import { activityAPI, aiAPI, photoAPI } from '../../services/api';
 
 const OutsidePage = () => {
   const { user } = useAuth();
@@ -42,6 +40,7 @@ const OutsidePage = () => {
 
   useEffect(() => {
     loadData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tab]);
 
   const loadData = async () => {
