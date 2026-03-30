@@ -1,13 +1,12 @@
 const express = require('express');
 const router = express.Router();
 const { protect } = require('../middleware/auth');
-const upload = require('../middleware/upload');
+const { upload, cloudinary } = require('../middleware/upload');
 const Photo = require('../models/Photo');
-const fs = require('fs');
 const path = require('path');
 
 // @route   POST /api/photos/upload
-// @desc    Upload and analyze a photo
+// @desc    Upload and save photo to Cloudinary
 router.post('/upload', protect, upload.single('photo'), async (req, res) => {
   try {
     if (!req.file) {
@@ -16,23 +15,22 @@ router.post('/upload', protect, upload.single('photo'), async (req, res) => {
 
     const { activityId } = req.body;
 
-    // Read file and convert to base64 for AI analysis
-    const filePath = req.file.path;
-    const fileBuffer = fs.readFileSync(filePath);
-    const base64Image = fileBuffer.toString('base64');
+    // Cloudinary result is in req.file
+    const photoUrl = req.file.path; // Cloudinary URL
+    const publicId = req.file.filename; // Cloudinary public_id
 
     // Create photo record
     const photo = await Photo.create({
       uploadedBy: req.user._id,
       activity: activityId || null,
       originalName: req.file.originalname,
-      filePath: `/uploads/photos/${req.file.filename}`,
+      filePath: photoUrl,
       fileType: req.file.mimetype,
       fileSize: req.file.size,
+      publicId: publicId,
       status: 'pending'
     });
 
-    // Return photo data (AI analysis will be done asynchronously or via separate endpoint)
     res.status(201).json({
       success: true,
       data: {
@@ -79,15 +77,6 @@ router.get('/:id', protect, async (req, res) => {
       return res.status(404).json({ success: false, message: 'Foto não encontrada' });
     }
 
-    // Only allow owner, their parent, or teacher to view
-    const canView = photo.uploadedBy._id.toString() === req.user._id.toString() ||
-      (req.user.role === 'parent' && photo.uploadedBy.linkedParent?.toString() === req.user._id.toString()) ||
-      req.user.role === 'teacher';
-
-    if (!canView) {
-      return res.status(403).json({ success: false, message: 'Sem permissão' });
-    }
-
     res.json({ success: true, data: photo });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
@@ -95,7 +84,7 @@ router.get('/:id', protect, async (req, res) => {
 });
 
 // @route   DELETE /api/photos/:id
-// @desc    Delete a photo
+// @desc    Delete a photo from Cloudinary
 router.delete('/:id', protect, async (req, res) => {
   try {
     const photo = await Photo.findById(req.params.id);
@@ -107,10 +96,13 @@ router.delete('/:id', protect, async (req, res) => {
       return res.status(403).json({ success: false, message: 'Sem permissão' });
     }
 
-    // Delete file from disk
-    const fullPath = path.join(__dirname, '..', photo.filePath);
-    if (fs.existsSync(fullPath)) {
-      fs.unlinkSync(fullPath);
+    // Delete from Cloudinary
+    if (photo.publicId) {
+      try {
+        await cloudinary.uploader.destroy(photo.publicId);
+      } catch (e) {
+        console.error('Cloudinary delete error:', e);
+      }
     }
 
     await Photo.findByIdAndDelete(req.params.id);

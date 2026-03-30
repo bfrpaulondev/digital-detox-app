@@ -3,8 +3,7 @@ const router = express.Router();
 const { protect } = require('../middleware/auth');
 const { validatePhoto, generateActivitySuggestions, validateActivity } = require('../services/aiService');
 const Photo = require('../models/Photo');
-const fs = require('fs');
-const path = require('path');
+const axios = require('axios');
 
 // @route   POST /api/ai/analyze-photo
 // @desc    Analyze a photo with AI (face detection, activity validation)
@@ -21,14 +20,18 @@ router.post('/analyze-photo', protect, async (req, res) => {
       return res.status(404).json({ success: false, message: 'Foto não encontrada' });
     }
 
-    // Read photo file
-    const fullPath = path.join(__dirname, '..', photo.filePath);
-    if (!fs.existsSync(fullPath)) {
-      return res.status(404).json({ success: false, message: 'Ficheiro da foto não encontrado' });
+    // Get image from Cloudinary URL
+    let base64Image;
+    try {
+      // Download image from Cloudinary and convert to base64
+      const imageResponse = await axios.get(photo.filePath, {
+        responseType: 'arraybuffer',
+        timeout: 10000
+      });
+      base64Image = Buffer.from(imageResponse.data, 'binary').toString('base64');
+    } catch (error) {
+      return res.status(400).json({ success: false, message: 'Não foi possível carregar a imagem' });
     }
-
-    const fileBuffer = fs.readFileSync(fullPath);
-    const base64Image = fileBuffer.toString('base64');
 
     // Analyze with AI
     const analysis = await validatePhoto(base64Image);
@@ -47,7 +50,7 @@ router.post('/analyze-photo', protect, async (req, res) => {
     // Auto-approve or flag for manual review
     if (!analysis.hasFace && analysis.isValidActivityProof) {
       photo.status = 'approved';
-      photo.pointsAwarded = 10; // Default points for valid proof
+      photo.pointsAwarded = 10;
     } else if (analysis.hasFace) {
       photo.status = 'manual_review';
       photo.rejectionReason = 'Foto contém rosto. Confirmação manual necessária.';
@@ -86,9 +89,9 @@ router.post('/suggestions', protect, async (req, res) => {
     };
 
     if (userPreferences.length === 0) {
-      return res.status(400).json({
-        success: false,
-        message: 'Defina as suas preferências de atividades primeiro'
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Defina as suas preferências de atividades primeiro' 
       });
     }
 

@@ -24,6 +24,9 @@ const photoSchema = new mongoose.Schema({
   fileSize: {
     type: Number
   },
+  publicId: {
+    type: String
+  },
   // AI Analysis
   aiAnalysis: {
     hasFace: {
