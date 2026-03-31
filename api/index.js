@@ -1,15 +1,10 @@
-// Vercel serverless API entry point
-require('dotenv').config({ path: require('path').join(__dirname, '../server/.env') });
-
-const serverless = require('serverless-http');
-const mongoose = require('mongoose');
+// Main API - standalone Vercel function (no serverless-http)
 const express = require('express');
-
-// Create Express app (same as server/src/index.js but without listen)
-const app = express();
 const cors = require('cors');
 const helmet = require('helmet');
-const path = require('path');
+const mongoose = require('mongoose');
+
+const app = express();
 
 // Middleware
 app.use(helmet({ contentSecurityPolicy: false }));
@@ -31,7 +26,6 @@ const photoRoutes = require('../server/routes/photo.routes');
 const calendarRoutes = require('../server/routes/calendar.routes');
 const aiRoutes = require('../server/routes/ai.routes');
 
-// API Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/schools', schoolRoutes);
@@ -42,11 +36,6 @@ app.use('/api/photos', photoRoutes);
 app.use('/api/calendar', calendarRoutes);
 app.use('/api/ai', aiRoutes);
 
-// Health check
-app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok', timestamp: new Date().toISOString() });
-});
-
 // Error handler
 app.use((err, req, res, next) => {
   console.error(err.stack);
@@ -56,22 +45,22 @@ app.use((err, req, res, next) => {
   });
 });
 
-// Connect to MongoDB (cached connection for serverless)
+// Cache DB connection
 let cachedDb = null;
-async function connectToDatabase() {
-  if (cachedDb) return cachedDb;
-  const db = await mongoose.connect(process.env.MONGODB_URI);
-  cachedDb = db;
-  return db;
+async function connectDB() {
+  if (cachedDb && cachedDb.readyState === 1) return;
+  await mongoose.connect(process.env.MONGODB_URI, {
+    serverSelectionTimeoutMS: 15000,
+    connectTimeoutMS: 15000
+  });
+  cachedDb = mongoose.connection;
 }
 
-// Middleware to ensure DB connection before handling requests
-app.use(async (req, res, next) => {
-  if (!cachedDb) {
-    await connectToDatabase();
-  }
-  next();
-});
-
-// Export as serverless function
-module.exports = serverless(app);
+// Standalone Vercel handler
+module.exports = async function handler(req, res) {
+  // Connect DB before handling
+  await connectDB();
+  
+  // Use express to handle the request
+  return app(req, res);
+};

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Box, Typography, Card, CardContent, Tabs, Tab, List, ListItem,
   ListItemText, Chip, Button, TextField, Dialog,
@@ -33,11 +33,7 @@ const SchoolPage = () => {
     isMission: false, requiresPhoto: false
   });
 
-  useEffect(() => {
-    loadData();
-  }, [tab]);
-
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     setLoading(true);
     try {
       if (user.role === 'teacher') {
@@ -63,7 +59,11 @@ const SchoolPage = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [tab, user.role]);
+
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
 
   const handleCreateActivity = async () => {
     try {

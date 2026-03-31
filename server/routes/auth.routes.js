@@ -16,13 +16,22 @@ router.post('/register', async (req, res) => {
       return res.status(400).json({ success: false, message: 'Campos obrigatórios em falta' });
     }
 
+    // Resolve school code to ObjectId
+    let schoolId = school;
+    if (school) {
+      const ObjectId = require('mongoose').Types.ObjectId;
+      if (!ObjectId.isValid(school)) {
+        const schoolDoc = await School.findOne({ code: school });
+        schoolId = schoolDoc ? schoolDoc._id : null;
+      }
+    }
+
     // Role-specific validation
     if (role === 'teacher') {
-      if (!school) return res.status(400).json({ success: false, message: 'Selecione uma escola' });
+      if (!schoolId) return res.status(400).json({ success: false, message: 'Selecione uma escola' });
     }
 
     if (role === 'student') {
-      if (!school) return res.status(400).json({ success: false, message: 'Selecione uma escola' });
       if (!grade) return res.status(400).json({ success: false, message: 'Selecione o ano escolar' });
     }
 
@@ -44,13 +53,13 @@ router.post('/register', async (req, res) => {
 
     // Role-specific fields
     if (role === 'teacher') {
-      userData.school = school;
+      userData.school = schoolId;
       userData.teacherNumber = teacherNumber;
       userData.subjects = subjects || [];
     }
 
     if (role === 'student') {
-      userData.school = school;
+      userData.school = schoolId;
       userData.studentNumber = studentNumber;
       userData.grade = grade;
 

@@ -7,7 +7,7 @@ const API_BASE = process.env.REACT_APP_API_URL ||
 
 const api = axios.create({
   baseURL: API_BASE,
-  timeout: 30000,
+  timeout: 90000,
   headers: {
     'Content-Type': 'application/json'
   }
@@ -32,7 +32,8 @@ api.interceptors.response.use(
     if (error.response?.status === 401) {
       localStorage.removeItem('token');
       localStorage.removeItem('user');
-      window.location.href = '/login';
+      // Use custom event instead of hard redirect to avoid race conditions
+      window.dispatchEvent(new CustomEvent('auth:unauthorized'));
     }
     return Promise.reject(error);
   }

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Box, Typography, List, ListItem, ListItemIcon, ListItemText,
   Avatar, Paper, MenuItem, TextField
@@ -12,11 +12,7 @@ const RankingPage = () => {
   const [grade, setGrade] = useState('');
   const [, setLoading] = useState(true);
 
-  useEffect(() => {
-    loadRanking();
-  }, [grade]);
-
-  const loadRanking = async () => {
+  const loadRanking = useCallback(async () => {
     try {
       const params = {};
       if (grade) params.grade = grade;
@@ -27,7 +23,11 @@ const RankingPage = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [grade]);
+
+  useEffect(() => {
+    loadRanking();
+  }, [loadRanking]);
 
   const getMedalColor = (position) => {
     switch (position) {

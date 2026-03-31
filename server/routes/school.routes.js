@@ -4,8 +4,8 @@ const { protect, authorize } = require('../middleware/auth');
 const School = require('../models/School');
 
 // @route   GET /api/schools
-// @desc    Get all schools
-router.get('/', protect, async (req, res) => {
+// @desc    Get all schools (public - needed for registration)
+router.get('/', async (req, res) => {
   try {
     const schools = await School.find({ isActive: true }).sort({ name: 1 });
     res.json({ success: true, data: schools });

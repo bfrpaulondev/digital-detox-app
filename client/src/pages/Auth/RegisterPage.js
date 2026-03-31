@@ -218,8 +218,17 @@ const RegisterPage = () => {
               </Typography>
 
               {(formData.role === 'student' || formData.role === 'teacher') && (
-                <TextField fullWidth select label="Escola" name="school" value={formData.school} onChange={handleChange} required sx={{ mb: 2 }}>
-                  {schools.map(s => <MenuItem key={s._id} value={s._id}>{s.name}</MenuItem>)}
+                <TextField
+                  fullWidth
+                  select
+                  label={schools.length > 0 ? "Escola" : "Escola (a carregar...)"}
+                  name="school"
+                  value={formData.school}
+                  onChange={handleChange}
+                  sx={{ mb: 2 }}
+                  helperText={schools.length === 0 ? "Pode registar sem escola e adicionar depois" : "Selecione a sua escola"}
+                >
+                  {schools.map(s => <MenuItem key={s._id || s.code} value={s.code}>{s.name}</MenuItem>)}
                 </TextField>
               )}
 

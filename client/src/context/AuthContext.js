@@ -15,6 +15,7 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(localStorage.getItem('token'));
   const [loading, setLoading] = useState(true);
+  const navigateRef = React.useRef(null);
 
   useEffect(() => {
     const initAuth = async () => {
@@ -43,6 +44,23 @@ export const AuthProvider = ({ children }) => {
     };
 
     initAuth();
+  }, []);
+
+  // Listen for 401 unauthorized events from the API interceptor
+  useEffect(() => {
+    const handleUnauthorized = () => {
+      setToken(null);
+      setUser(null);
+      // Only redirect if not already on a public page (login/register)
+      if (typeof window !== 'undefined' &&
+          !window.location.pathname.includes('/login') &&
+          !window.location.pathname.includes('/register')) {
+        window.location.href = '/login';
+      }
+    };
+
+    window.addEventListener('auth:unauthorized', handleUnauthorized);
+    return () => window.removeEventListener('auth:unauthorized', handleUnauthorized);
   }, []);
 
   const login = async (email, password) => {
