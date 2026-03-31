@@ -1,3 +1,93 @@
+// ============================================================
+// PET DECAY SYSTEM
+// Stats decrease over time when the student is inactive.
+// Called every time the pet is fetched.
+// ============================================================
+function applyPetDecay(pet) {
+  // Decay rates per hour
+  const HUNGER_DECAY = 5;    // 20h to empty from 100
+  const HAPPINESS_DECAY = 3; // 33h to empty from 100
+  const ENERGY_DECAY = 2;    // 50h to empty from 100
+  const HEALTH_DECAY = 5;    // Only when hunger or happiness is critically low
+
+  const now = new Date();
+  const lastInteraction = new Date(pet.lastFed || pet.updatedAt || pet.createdAt);
+  const hoursSince = Math.max(0, (now - lastInteraction) / (1000 * 60 * 60));
+
+  // Only apply decay after 30 minutes of inactivity (avoid instant drops)
+  if (hoursSince < 0.5) return pet;
+
+  let hunger = Number(pet.hunger) || 80;
+  let happiness = Number(pet.happiness) || 80;
+  let energy = Number(pet.energy) || 100;
+  let health = Number(pet.health) || 100;
+
+  // Apply time-based decay (capped at 0, floored at 0)
+  hunger = Math.max(0, hunger - (HUNGER_DECAY * hoursSince));
+  happiness = Math.max(0, happiness - (HAPPINESS_DECAY * hoursSince));
+  energy = Math.max(0, energy - (ENERGY_DECAY * hoursSince));
+
+  // Health drops only when other stats are critically low (< 30)
+  if (hunger < 30 || happiness < 30) {
+    const criticalHours = Math.min(hoursSince, 10); // Cap damage over time
+    health = Math.max(0, health - (HEALTH_DECAY * criticalHours));
+  }
+
+  // Determine mood based on most critical stat
+  let mood = 'feliz';
+  if (health < 20) mood = 'doente';
+  else if (hunger < 15) mood = 'com_fome';
+  else if (hunger < 30) mood = 'com_fome';
+  else if (energy < 20) mood = 'sonolento';
+  else if (happiness < 20) mood = 'triste';
+  else if (energy > 80 && happiness > 80 && hunger > 60) mood = 'energetico';
+  else if (happiness > 60) mood = 'brincalhao';
+
+  // Build decayed pet (immutable — caller must persist if needed)
+  return {
+    ...pet,
+    hunger: Math.round(hunger),
+    happiness: Math.round(happiness),
+    energy: Math.round(energy),
+    health: Math.round(health),
+    mood
+  };
+}
+
+// Get pet with decay applied and persist changes to DB
+async function getAndDecayPet(mongoDb, ownerId) {
+  const pet = await mongoDb.collection('pets').findOne({ owner: ownerId });
+  if (!pet) return null;
+
+  const decayed = applyPetDecay(pet);
+
+  // Persist decayed values if any stat changed
+  const statsChanged =
+    (decayed.hunger !== Number(pet.hunger)) ||
+    (decayed.happiness !== Number(pet.happiness)) ||
+    (decayed.energy !== Number(pet.energy)) ||
+    (decayed.health !== Number(pet.health)) ||
+    (decayed.mood !== pet.mood);
+
+  if (statsChanged) {
+    await mongoDb.collection('pets').updateOne(
+      { owner: ownerId },
+      {
+        $set: {
+          hunger: decayed.hunger,
+          happiness: decayed.happiness,
+          energy: decayed.energy,
+          health: decayed.health,
+          mood: decayed.mood,
+          updatedAt: new Date()
+        }
+      }
+    );
+  }
+
+  return decayed;
+}
+
 // Main API - standalone Vercel function (no serverless-http)
 const mongoose = require('mongoose');
 
@@ -188,10 +278,11 @@ module.exports = async function handler(req, res) {
         });
         let petData = null;
         try {
-          const pet = await mongoDb.collection('pets').findOne({ owner: currentUser._id });
+          const pet = await getAndDecayPet(mongoDb, currentUser._id);
           if (pet) petData = {
             name: pet.name, level: pet.level, species: pet.species,
-            mood: pet.mood, evolutionStage: pet.evolutionStage
+            mood: pet.mood, evolutionStage: pet.evolutionStage,
+            hunger: pet.hunger, happiness: pet.happiness, energy: pet.energy, health: pet.health
           };
         } catch (e) { console.error('Pet fetch error:', e.message); }
 
@@ -635,7 +726,7 @@ module.exports = async function handler(req, res) {
     // GET /api/pets/my
     if (path === '/api/pets/my' && method === 'GET') {
       if (!currentUser) return authError(res);
-      const pet = await mongoDb.collection('pets').findOne({ owner: currentUser._id });
+      const pet = await getAndDecayPet(mongoDb, currentUser._id);
       if (!pet) return res.status(404).json({ success: false, message: 'Nenhum animal encontrado' });
       return res.json({ success: true, data: pet });
     }

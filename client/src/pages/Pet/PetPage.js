@@ -25,7 +25,7 @@ const speciesData = {
 
 const moodLabels = {
   feliz: 'Feliz 😊', triste: 'Triste 😢', sonolento: 'Sonolento 😴', energico: 'Energético ⚡',
-  com_fome: 'Com fome 😫', brincalhao: 'Brincalhão 😄'
+  com_fome: 'Com fome 😫', brincalhao: 'Brincalhão 😄', doente: 'Doente 🤒'
 };
 
 const PetPage = () => {
@@ -101,18 +101,27 @@ const PetPage = () => {
     setTimeout(() => { setExcited(false); setMessage(''); }, 2500);
   };
 
-  const StatBar = ({ label, value, icon, color }) => (
+  const StatBar = ({ label, value, icon, color, warning }) => (
     <Box sx={{ mb: 1.5 }}>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
-        <Typography variant="body2" fontWeight={600}>{label}</Typography>
-        <Typography variant="body2" color="text.secondary">{value}%</Typography>
+        <Typography variant="body2" fontWeight={600}>
+          {label}
+          {warning && <Typography component="span" sx={{ ml: 0.5, fontSize: '0.7rem', color: '#F44336' }}>⚠️</Typography>}
+        </Typography>
+        <Typography variant="body2" color={value < 25 ? 'error' : 'text.secondary'} fontWeight={value < 25 ? 700 : 400}>
+          {value}%
+        </Typography>
       </Box>
       <LinearProgress
         variant="determinate"
         value={value}
         sx={{
           height: 8, borderRadius: 4, bgcolor: '#E0E0E0',
-          '& .MuiLinearProgress-bar': { bgcolor: color, borderRadius: 4 }
+          '& .MuiLinearProgress-bar': {
+            bgcolor: value < 15 ? '#F44336' : value < 30 ? '#FF9800' : color,
+            borderRadius: 4,
+            transition: 'background-color 0.5s ease'
+          }
         }}
       />
     </Box>
@@ -226,6 +235,25 @@ const PetPage = () => {
             />
           </Box>
 
+          {/* Urgent care banner when stats are critical */}
+          {(pet?.health < 30 || pet?.hunger < 20) && (
+            <Paper
+              sx={{
+                mt: 2, mx: 1, p: 1.5, textAlign: 'center',
+                bgcolor: pet?.health < 20 ? '#FFEBEE' : '#FFF3E0',
+                borderRadius: 2,
+                border: `1px solid ${pet?.health < 20 ? '#EF9A9A' : '#FFCC80'}`,
+                animation: 'pulse 2s ease-in-out infinite'
+              }}>
+              <Typography variant="body2" fontWeight={600} color={pet?.health < 20 ? '#C62828' : '#E65100'}>
+                {pet?.health < 20
+                  ? `🚨 ${pet?.name} precisa de ajuda urgente! Alimenta-o!`
+                  : `⚠️ ${pet?.name} está com muita fome! Não o esqueças!`
+                }
+              </Typography>
+            </Paper>
+          )}
+
           {/* Experience bar */}
           <Box sx={{ px: 4, mt: 2 }}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
@@ -258,10 +286,10 @@ const PetPage = () => {
             <Typography variant="h6" fontWeight={700} sx={{ mb: 2 }}>
               Estado do {pet?.name}
             </Typography>
-            <StatBar label="Fome" value={pet?.hunger || 0} color="#FF9800" />
-            <StatBar label="Felicidade" value={pet?.happiness || 0} color="#E91E63" />
-            <StatBar label="Energia" value={pet?.energy || 0} color="#2196F3" />
-            <StatBar label="Saúde" value={pet?.health || 0} color="#4CAF50" />
+            <StatBar label="Fome" value={pet?.hunger || 0} color="#FF9800" warning={(pet?.hunger || 0) < 30} />
+            <StatBar label="Felicidade" value={pet?.happiness || 0} color="#E91E63" warning={(pet?.happiness || 0) < 30} />
+            <StatBar label="Energia" value={pet?.energy || 0} color="#2196F3" warning={(pet?.energy || 0) < 25} />
+            <StatBar label="Saúde" value={pet?.health || 0} color="#4CAF50" warning={(pet?.health || 0) < 30} />
           </CardContent>
         </Card>
 
