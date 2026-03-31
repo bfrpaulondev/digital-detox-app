@@ -1,4 +1,4 @@
-// Main API - standalone Vercel function
+// Main API v2 - standalone Vercel function
 const mongoose = require('mongoose');
 
 let cachedDb = null;
