@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import {
   Box, Typography, Card, CardContent, Tabs, Tab,
-  Chip, Button, TextField, Dialog, DialogTitle, DialogContent,
-  DialogActions, Paper, InputAdornment, LinearProgress
+  Chip, Button, Dialog, DialogTitle, DialogContent,
+  DialogActions, Paper, LinearProgress
 } from '@mui/material';
 import {
   NaturePeople as OutsideIcon,
@@ -35,11 +35,14 @@ const OutsidePage = () => {
   const [photoPreview, setPhotoPreview] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [aiResult, setAiResult] = useState(null);
+  // eslint-disable-next-line no-unused-vars
   const [searchQuery, setSearchQuery] = useState('');
 
+  /* eslint-disable react-hooks/exhaustive-deps */
   useEffect(() => {
     loadData();
   }, [tab]);
+  /* eslint-enable react-hooks/exhaustive-deps */
 
   const loadData = async () => {
     setLoading(true);

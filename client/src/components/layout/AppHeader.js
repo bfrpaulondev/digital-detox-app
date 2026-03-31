@@ -90,7 +90,7 @@ const AppHeader = ({ title, showBack, showNotifications, showProfile, notificati
                 <ListItemIcon><PersonIcon fontSize="small" /></ListItemIcon>
                 <ListItemText>Perfil</ListItemText>
               </MenuItem>
-              <MenuItem onClick={() => { setProfileAnchor(null); navigate('/settings'); }}>
+              <MenuItem onClick={() => { setProfileAnchor(null); navigate('/profile'); }}>
                 <ListItemIcon><SettingsIcon fontSize="small" /></ListItemIcon>
                 <ListItemText>Definições</ListItemText>
               </MenuItem>
