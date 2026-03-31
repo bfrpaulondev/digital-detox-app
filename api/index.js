@@ -922,6 +922,10 @@ module.exports = async function handler(req, res) {
       for (const field of allowedFields) {
         if (body[field] !== undefined) updateFields[field] = body[field];
       }
+      // Convert school to ObjectId if it looks like one
+      if (updateFields.school && typeof updateFields.school === 'string' && mongoose.Types.ObjectId.isValid(updateFields.school)) {
+        updateFields.school = new mongoose.Types.ObjectId(updateFields.school);
+      }
       updateFields.updatedAt = new Date();
 
       await mongoDb.collection('users').updateOne(
