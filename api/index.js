@@ -387,11 +387,13 @@ module.exports = async function handler(req, res) {
           activities.forEach(a => {
             if (a.completedBy) {
               a.completedBy = a.completedBy.map(c => {
-                const uid = (c.user?.toString?.() || c.user);
+                const uid = (typeof c.user === 'object' && c.user.toString) ? c.user.toString() : (typeof c.user === 'string' ? c.user : '');
                 const userInfo = usersMap[uid];
                 return {
                   ...c,
-                  user: userInfo || { fullName: uid === uid ? 'Aluno' : 'Desconhecido', grade: '' }
+                  user: uid, // Keep original userId as string for API calls
+                  userName: userInfo?.fullName || 'Aluno',
+                  userGrade: userInfo?.grade || ''
                 };
               });
             }

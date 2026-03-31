@@ -258,23 +258,24 @@ const SchoolPage = () => {
                     {isTeacher && currentTab === 1 && activity.completedBy?.length > 0 && (
                       <Box sx={{ mt: 1.5 }}>
                         {activity.completedBy.map((completion, idx) => {
-                          const studentName = completion.user?.toString?.() || completion.user || 'Aluno';
-                          const isObjectId = typeof completion.user === 'string' && completion.user.length === 24;
+                          const studentName = completion.userName || 'Aluno';
+                          const studentId = completion.user; // Original userId string from API
                           return (
                             <Box key={idx} sx={{ mt: 1, display: 'flex', alignItems: 'center', gap: 1, bgcolor: '#F5F5F5', p: 1, borderRadius: 2 }}>
                               <Avatar sx={{ width: 28, height: 28, bgcolor: 'primary.light', fontSize: 12 }}>
-                                {typeof studentName === 'string' ? studentName.charAt(0) : '?'}
+                                {studentName?.charAt(0) || '?'}
                               </Avatar>
                               <Typography variant="body2" sx={{ flex: 1 }}>
-                                {isObjectId ? 'Aluno' : studentName}
+                                {studentName}
+                                {completion.userGrade && <Typography component="span" variant="caption" sx={{ ml: 0.5, color: 'text.secondary' }}>({completion.userGrade}º ano)</Typography>}
                                 {!completion.validatedBy && <Typography component="span" variant="caption" sx={{ ml: 1, color: 'warning.main' }}>⏳ Pendente validação</Typography>}
                               </Typography>
                               {completion.validatedBy ? (
                                 <Chip label="Validado ✓" size="small" color="success" />
                               ) : (
                                 <>
-                                  <IconButton size="small" color="success" onClick={() => handleValidate(activity._id, isObjectId ? completion.user : undefined, true)}><CheckIcon fontSize="small" /></IconButton>
-                                  <IconButton size="small" color="error" onClick={() => handleValidate(activity._id, isObjectId ? completion.user : undefined, false)}><CloseIcon fontSize="small" /></IconButton>
+                                  <IconButton size="small" color="success" onClick={() => handleValidate(activity._id, studentId, true)}><CheckIcon fontSize="small" /></IconButton>
+                                  <IconButton size="small" color="error" onClick={() => handleValidate(activity._id, studentId, false)}><CloseIcon fontSize="small" /></IconButton>
                                 </>
                               )}
                             </Box>
