@@ -371,6 +371,7 @@ const PetPage = () => {
 
       {/* Feed Dialog */}
       <Dialog open={feedDialogOpen} onClose={() => setFeedDialogOpen(false)} fullWidth maxWidth="xs"
+        hideBackdrop={false}
         sx={{ '& .MuiDialog-paper': { borderRadius: 3, mx: 2 } }}>
         <DialogTitle fontWeight={700}>Alimentar {pet?.name}</DialogTitle>
         <DialogContent>
