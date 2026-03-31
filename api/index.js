@@ -367,6 +367,38 @@ module.exports = async function handler(req, res) {
 
       const activities = await mongoDb.collection('activities')
         .find(query).sort({ createdAt: -1 }).limit(50).toArray();
+
+      // Populate student names in completedBy for teacher view
+      if (currentUser.role === 'teacher' && activities.length > 0) {
+        const allUserIds = [];
+        activities.forEach(a => {
+          (a.completedBy || []).forEach(c => {
+            const uid = c.user?.toString?.() || c.user;
+            if (uid && uid.length === 24) allUserIds.push(new mongoose.Types.ObjectId(uid));
+          });
+        });
+        if (allUserIds.length > 0) {
+          const usersMap = {};
+          const users = await mongoDb.collection('users')
+            .find({ _id: { $in: allUserIds } })
+            .project({ fullName: 1, grade: 1 }).toArray();
+          users.forEach(u => { usersMap[u._id.toString()] = { fullName: u.fullName, grade: u.grade }; });
+
+          activities.forEach(a => {
+            if (a.completedBy) {
+              a.completedBy = a.completedBy.map(c => {
+                const uid = (c.user?.toString?.() || c.user);
+                const userInfo = usersMap[uid];
+                return {
+                  ...c,
+                  user: userInfo || { fullName: uid === uid ? 'Aluno' : 'Desconhecido', grade: '' }
+                };
+              });
+            }
+          });
+        }
+      }
+
       return res.json({ success: true, data: activities });
     }
 

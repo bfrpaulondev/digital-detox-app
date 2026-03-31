@@ -250,7 +250,7 @@ const DashboardPage = () => {
                     </Typography>
                   </ListItemIcon>
                   <ListItemText primary={student.fullName} secondary={`${student.grade}º ano`} />
-                  <Chip label={`${student.totalPoints} pts`} size="small" color="primary" />
+                  <Chip label={`${student.totalPoints || 0} pts`} size="small" color="primary" />
                 </ListItem>
               ))}
             </List>
