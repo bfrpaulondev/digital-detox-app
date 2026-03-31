@@ -918,7 +918,7 @@ module.exports = async function handler(req, res) {
       const userId = path.split('/').pop();
 
       const updateFields = {};
-      const allowedFields = ['fullName', 'phone', 'grade', 'activityPreferences', 'maxScreenTimeHours', 'sleepTime'];
+      const allowedFields = ['fullName', 'phone', 'grade', 'school', 'activityPreferences', 'maxScreenTimeHours', 'sleepTime'];
       for (const field of allowedFields) {
         if (body[field] !== undefined) updateFields[field] = body[field];
       }
