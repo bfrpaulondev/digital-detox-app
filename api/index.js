@@ -664,59 +664,95 @@ module.exports = async function handler(req, res) {
     // PUT /api/pets/feed
     if (path === '/api/pets/feed' && method === 'PUT') {
       if (!currentUser) return authError(res);
-      const { points } = body;
-      if (!points || points <= 0) return res.status(400).json({ success: false, message: 'Pontos inválidos' });
-      if (points > (currentUser.totalPoints || 0)) {
-        return res.status(400).json({ success: false, message: 'Pontos insuficientes' });
-      }
 
-      const pet = await mongoDb.collection('pets').findOne({ owner: currentUser._id });
-      if (!pet) return res.status(404).json({ success: false, message: 'Animal não encontrado' });
-
-      const newHunger = Math.min(100, (pet.hunger || 0) + 20);
-      const newHappiness = Math.min(100, (pet.happiness || 0) + 5);
-      const newEnergy = Math.min(100, (pet.energy || 0) + 10);
-      const newExperience = (pet.experience || 0) + points;
-      const newFeedCount = (pet.feedCount || 0) + 1;
-      let newLevel = pet.level || 1;
-      let newExpToNext = pet.experienceToNextLevel || 100;
-      let newEvoStage = pet.evolutionStage || 1;
-      let newMood = 'feliz';
-
-      while (newExperience >= newExpToNext && newLevel < 20) {
-        newExperience -= newExpToNext;
-        newLevel += 1;
-        newExpToNext = Math.floor(newExpToNext * 1.3);
-        if (newLevel === 5) newEvoStage = 2;
-        if (newLevel === 10) newEvoStage = 3;
-        if (newLevel === 15) newEvoStage = 4;
-      }
-
-      if (newHunger < 30) newMood = 'com_fome';
-      else if (newEnergy < 20) newMood = 'sonolento';
-      else if (newHappiness < 30) newMood = 'triste';
-      else if (newEnergy > 80 && newHappiness > 80) newMood = 'energetico';
-      else if (newHappiness > 60) newMood = 'brincalhao';
-
-      await mongoDb.collection('pets').updateOne(
-        { owner: currentUser._id },
-        {
-          $set: {
-            hunger: newHunger, happiness: newHappiness, energy: newEnergy,
-            experience: newExperience, level: newLevel, experienceToNextLevel: newExpToNext,
-            evolutionStage: newEvoStage, mood: newMood, feedCount: newFeedCount,
-            totalPointsSpent: (pet.totalPointsSpent || 0) + points,
-            lastFed: new Date(), updatedAt: new Date()
-          }
+      try {
+        // Force numeric types to prevent string concatenation bugs
+        const rawPoints = Number(body.points);
+        if (!rawPoints || rawPoints <= 0 || !Number.isFinite(rawPoints)) {
+          return res.status(400).json({ success: false, message: 'Pontos inválidos' });
         }
-      );
-      await mongoDb.collection('users').updateOne(
-        { _id: currentUser._id },
-        { $inc: { totalPoints: -points } }
-      );
+        const points = Math.floor(rawPoints); // Ensure integer
 
-      const updatedPet = await mongoDb.collection('pets').findOne({ owner: currentUser._id });
-      return res.json({ success: true, data: updatedPet, message: `${pet.name} foi alimentado!` });
+        const userTotalPoints = Number(currentUser.totalPoints) || 0;
+        if (points > userTotalPoints) {
+          return res.status(400).json({ success: false, message: 'Pontos insuficientes' });
+        }
+
+        const pet = await mongoDb.collection('pets').findOne({ owner: currentUser._id });
+        if (!pet) return res.status(404).json({ success: false, message: 'Animal não encontrado' });
+
+        // Force all pet values to numbers (fix corrupted data from previous bugs)
+        const currentExp = Number(pet.experience) || 0;
+        const currentLevel = Number(pet.level) || 1;
+        const currentExpToNext = Number(pet.experienceToNextLevel) || 100;
+        const currentEvoStage = Number(pet.evolutionStage) || 1;
+        const currentFeedCount = Number(pet.feedCount) || 0;
+        const currentPointsSpent = Number(pet.totalPointsSpent) || 0;
+
+        const newHunger = Math.min(100, Math.max(0, (Number(pet.hunger) || 0) + 20));
+        const newHappiness = Math.min(100, Math.max(0, (Number(pet.happiness) || 0) + 5));
+        const newEnergy = Math.min(100, Math.max(0, (Number(pet.energy) || 0) + 10));
+        let newExperience = currentExp + points;
+        let newLevel = currentLevel;
+        let newExpToNext = currentExpToNext;
+        let newEvoStage = currentEvoStage;
+        let newMood = 'feliz';
+        const leveledUp = newLevel !== currentLevel;
+
+        // Level-up loop
+        while (newExperience >= newExpToNext && newLevel < 20) {
+          newExperience -= newExpToNext;
+          newLevel += 1;
+          newExpToNext = Math.floor(newExpToNext * 1.3);
+          if (newLevel === 5) newEvoStage = 2;
+          if (newLevel === 10) newEvoStage = 3;
+          if (newLevel === 15) newEvoStage = 4;
+        }
+
+        if (newHunger < 30) newMood = 'com_fome';
+        else if (newEnergy < 20) newMood = 'sonolento';
+        else if (newHappiness < 30) newMood = 'triste';
+        else if (newEnergy > 80 && newHappiness > 80) newMood = 'energetico';
+        else if (newHappiness > 60) newMood = 'brincalhao';
+
+        console.log(`[FEED] pet=${pet.name} exp:${currentExp}->${newExperience} lvl:${currentLevel}->${newLevel} pts:${points}`);
+
+        await mongoDb.collection('pets').updateOne(
+          { owner: currentUser._id },
+          {
+            $set: {
+              hunger: newHunger,
+              happiness: newHappiness,
+              energy: newEnergy,
+              experience: newExperience,
+              level: newLevel,
+              experienceToNextLevel: newExpToNext,
+              evolutionStage: newEvoStage,
+              mood: newMood,
+              feedCount: currentFeedCount + 1,
+              totalPointsSpent: currentPointsSpent + points,
+              lastFed: new Date(),
+              updatedAt: new Date()
+            }
+          }
+        );
+        await mongoDb.collection('users').updateOne(
+          { _id: currentUser._id },
+          { $inc: { totalPoints: -points } }
+        );
+
+        const updatedPet = await mongoDb.collection('pets').findOne({ owner: currentUser._id });
+
+        let message = `${pet.name} foi alimentado! +${points} XP`;
+        if (newLevel > currentLevel) {
+          message = `${pet.name} subiu para o nível ${newLevel}! 🎉`;
+        }
+
+        return res.json({ success: true, data: updatedPet, message });
+      } catch (feedErr) {
+        console.error('[FEED ERROR]', feedErr.message, feedErr.stack);
+        return res.status(500).json({ success: false, message: 'Erro ao alimentar: ' + feedErr.message });
+      }
     }
 
     // PUT /api/pets/:id/environment
