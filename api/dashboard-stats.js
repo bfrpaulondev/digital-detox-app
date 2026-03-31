@@ -42,7 +42,7 @@ module.exports = async function handler(req, res) {
     const user = await User.findById(decoded.id);
     if (!user) return res.status(401).json({ success: false, message: 'Utilizador não encontrado' });
 
-    const stats = {};
+    let stats = {};
 
     if (user.role === 'student') {
       const db = mongoose.connection.db;
