@@ -91,9 +91,7 @@ export const dashboardAPI = {
 
 // Photo API
 export const photoAPI = {
-  upload: (formData) => api.post('/photos/upload', formData, {
-    headers: { 'Content-Type': 'multipart/form-data' }
-  }),
+  upload: (data) => api.post('/photos/upload', data), // Now sends JSON with base64
   getAll: (params) => api.get('/photos', { params }),
   getById: (id) => api.get(`/photos/${id}`),
   delete: (id) => api.delete(`/photos/${id}`)

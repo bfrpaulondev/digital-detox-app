@@ -2,16 +2,18 @@ import React, { useState, useEffect } from 'react';
 import {
   Box, Typography, Card, CardContent, Grid, Button, LinearProgress,
   Chip, Dialog, DialogTitle, DialogContent, DialogActions, Paper,
-  Slider, TextField
+  Slider, TextField, Collapse
 } from '@mui/material';
 import {
   Pets as PetsIcon,
   Restaurant as FeedIcon,
-  Favorite as HeartIcon
+  Favorite as HeartIcon,
+  SportsEsports as PlayIcon,
+  AutoAwesome as SparkleIcon
 } from '@mui/icons-material';
 import { useAuth } from '../../context/AuthContext';
 import AppHeader from '../../components/layout/AppHeader';
-import PetAvatar from '../../components/common/PetAvatar';
+import PetAnimation from '../../components/common/PetAnimation';
 import { petAPI } from '../../services/api';
 
 const speciesData = {
@@ -21,13 +23,13 @@ const speciesData = {
   tartaruga: { name: 'Tartaruga', emoji: '🐢' }
 };
 
-const moodEmojis = {
-  feliz: '😊', triste: '😢', sonolento: '😴', energico: '⚡',
-  com_fome: '😫', brincalhao: '😄'
+const moodLabels = {
+  feliz: 'Feliz 😊', triste: 'Triste 😢', sonolento: 'Sonolento 😴', energico: 'Energético ⚡',
+  com_fome: 'Com fome 😫', brincalhao: 'Brincalhão 😄'
 };
 
 const PetPage = () => {
-  const { user } = useAuth();
+  const { user, updateUser } = useAuth();
   const [pet, setPet] = useState(null);
   const [hasPet, setHasPet] = useState(false);
   const [adoptDialogOpen, setAdoptDialogOpen] = useState(false);
@@ -35,6 +37,9 @@ const PetPage = () => {
   const [feedPoints, setFeedPoints] = useState(5);
   const [newPet, setNewPet] = useState({ species: '', name: '' });
   const [loading, setLoading] = useState(true);
+  const [excited, setExcited] = useState(false);
+  const [showLove, setShowLove] = useState(false);
+  const [message, setMessage] = useState('');
 
   useEffect(() => {
     loadPet();
@@ -60,6 +65,8 @@ const PetPage = () => {
       setPet(res.data.data);
       setHasPet(true);
       setAdoptDialogOpen(false);
+      setMessage(`${newPet.name} foi adotado! Cuida bem dele!`);
+      setTimeout(() => setMessage(''), 3000);
     } catch (e) {
       console.error(e);
     }
@@ -70,9 +77,30 @@ const PetPage = () => {
       const res = await petAPI.feed(feedPoints);
       setPet(res.data.data);
       setFeedDialogOpen(false);
+      if (updateUser) {
+        const updatedUser = { ...user, totalPoints: (user.totalPoints || 0) - feedPoints };
+        updateUser(updatedUser);
+      }
+      setMessage(`${pet.name} foi alimentado! +${feedPoints} XP`);
+      setExcited(true);
+      setTimeout(() => { setExcited(false); setMessage(''); }, 2500);
     } catch (e) {
-      console.error(e);
+      setMessage(e.response?.data?.message || 'Erro ao alimentar');
+      setTimeout(() => setMessage(''), 3000);
     }
+  };
+
+  const handlePet = () => {
+    setShowLove(true);
+    setExcited(true);
+    setMessage(`${pet.name} adorou! 💕`);
+    setTimeout(() => { setShowLove(false); setExcited(false); setMessage(''); }, 2000);
+  };
+
+  const handlePlay = () => {
+    setExcited(true);
+    setMessage(`${pet.name} está a brincar! 🎮`);
+    setTimeout(() => { setExcited(false); setMessage(''); }, 2500);
   };
 
   const StatBar = ({ label, value, icon, color }) => (
@@ -85,13 +113,8 @@ const PetPage = () => {
         variant="determinate"
         value={value}
         sx={{
-          height: 8,
-          borderRadius: 4,
-          bgcolor: '#E0E0E0',
-          '& .MuiLinearProgress-bar': {
-            bgcolor: color,
-            borderRadius: 4
-          }
+          height: 8, borderRadius: 4, bgcolor: '#E0E0E0',
+          '& .MuiLinearProgress-bar': { bgcolor: color, borderRadius: 4 }
         }}
       />
     </Box>
@@ -102,21 +125,24 @@ const PetPage = () => {
     return (
       <Box sx={{ minHeight: '100vh', bgcolor: 'background.default', pb: 10 }}>
         <AppHeader title="Animal Virtual" showBack showProfile={false} />
-        <Box sx={{ px: 2, pt: 3, textAlign: 'center' }}>
-          <PetsIcon sx={{ fontSize: 64, color: 'grey.300', mb: 2 }} />
-          <Typography variant="h5" fontWeight={700} gutterBottom>
+        <Box sx={{ px: 2, pt: 4, textAlign: 'center' }}>
+          <Typography sx={{ fontSize: 80, mb: 2, animation: 'float 3s ease-in-out infinite' }}>🥚</Typography>
+          <Typography variant="h5" fontWeight={800} gutterBottom>
             Adote o seu Animal Virtual!
           </Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 3, px: 2 }}>
             Escolha um companheiro para crescer contigo enquanto faz atividades offline.
+            Alimente-o, brinque com ele e veja-o evoluir!
           </Typography>
-          <Button variant="contained" size="large" onClick={() => setAdoptDialogOpen(true)} startIcon={<PetsIcon />}>
+          <Button variant="contained" size="large" onClick={() => setAdoptDialogOpen(true)}
+            startIcon={<PetsIcon />} sx={{ px: 4, py: 1.5, borderRadius: 3, fontSize: 16 }}>
             Adotar Animal
           </Button>
         </Box>
 
-        <Dialog open={adoptDialogOpen} onClose={() => setAdoptDialogOpen(false)} fullWidth>
-          <DialogTitle>Adotar Animal</DialogTitle>
+        <Dialog open={adoptDialogOpen} onClose={() => setAdoptDialogOpen(false)} fullWidth
+          sx={{ '& .MuiDialog-paper': { borderRadius: 3, mx: 2 } }}>
+          <DialogTitle fontWeight={700}>Adotar Animal</DialogTitle>
           <DialogContent>
             <Typography variant="subtitle2" sx={{ mb: 1 }}>Escolha a espécie:</Typography>
             <Grid container spacing={1} sx={{ mb: 2 }}>
@@ -128,7 +154,8 @@ const PetPage = () => {
                       p: 2, textAlign: 'center', cursor: 'pointer',
                       border: '2px solid',
                       borderColor: newPet.species === key ? 'primary.main' : 'grey.200',
-                      borderRadius: 3
+                      borderRadius: 3, transition: 'all 0.2s',
+                      '&:hover': { borderColor: 'primary.light', transform: 'scale(1.02)' }
                     }}
                   >
                     <Typography sx={{ fontSize: 40 }}>{data.emoji}</Typography>
@@ -138,16 +165,15 @@ const PetPage = () => {
               ))}
             </Grid>
             <TextField
-              fullWidth
-              label="Nome do animal"
-              value={newPet.name}
+              fullWidth label="Nome do animal" value={newPet.name}
               onChange={(e) => setNewPet(p => ({ ...p, name: e.target.value }))}
               inputProps={{ maxLength: 30 }}
             />
           </DialogContent>
-          <DialogActions>
+          <DialogActions sx={{ p: 2 }}>
             <Button onClick={() => setAdoptDialogOpen(false)}>Cancelar</Button>
-            <Button variant="contained" onClick={handleAdopt} disabled={!newPet.species || !newPet.name}>
+            <Button variant="contained" onClick={handleAdopt}
+              disabled={!newPet.species || !newPet.name} sx={{ borderRadius: 2 }}>
               Adotar!
             </Button>
           </DialogActions>
@@ -170,95 +196,191 @@ const PetPage = () => {
     <Box sx={{ minHeight: '100vh', bgcolor: 'background.default', pb: 10 }}>
       <AppHeader title="Animal Virtual" showBack showProfile={false} />
 
-      <Box sx={{ px: 2, pt: 2 }}>
-        {/* Pet Display */}
-        <Card sx={{ mb: 2, textAlign: 'center', py: 4, background: 'linear-gradient(180deg, #FFF8E1 0%, #FFFFFF 100%)' }}>
-          <PetAvatar species={pet.species} mood={pet.mood} evolutionStage={pet.evolutionStage} size={100} />
-          <Typography variant="h4" fontWeight={800} sx={{ mt: 2 }}>{pet.name}</Typography>
+      <Box sx={{ px: 2, pt: 1 }}>
+        {/* Pet Animation Display */}
+        <Card sx={{
+          mb: 2, textAlign: 'center', py: 3,
+          background: pet?.evolutionStage >= 3
+            ? 'linear-gradient(180deg, #FFF8E1 0%, #F3E5F5 50%, #FFFFFF 100%)'
+            : 'linear-gradient(180deg, #FFF8E1 0%, #FFFFFF 100%)',
+          borderRadius: 3, position: 'relative', overflow: 'visible'
+        }}>
+          <PetAnimation
+            species={pet?.species}
+            mood={pet?.mood}
+            evolutionStage={pet?.evolutionStage}
+            size={180}
+            excited={excited}
+          />
+
+          <Typography variant="h5" fontWeight={800} sx={{ mt: 1 }}>
+            {pet?.name}
+          </Typography>
           <Typography variant="body2" color="text.secondary">
-            {speciesData[pet.species]?.name} • {moodEmojis[pet.mood]} {pet.mood}
+            {speciesData[pet?.species]?.name} • {moodLabels[pet?.mood] || pet?.mood}
           </Typography>
           <Box sx={{ display: 'flex', justifyContent: 'center', gap: 1, mt: 1 }}>
-            <Chip label={`Nível ${pet.level}`} color="primary" />
-            <Chip label={pet.evolutionStage === 1 ? 'Ovo' : pet.evolutionStage === 2 ? 'Bebé' : pet.evolutionStage === 3 ? 'Jovem' : 'Adulto'} variant="outlined" />
+            <Chip label={`Nível ${pet?.level}`} color="primary" size="small" />
+            <Chip
+              label={pet?.evolutionStage === 1 ? '🥚 Ovo' : pet?.evolutionStage === 2 ? '🐣 Bebé' : pet?.evolutionStage === 3 ? '🐾 Jovem' : '👑 Adulto'}
+              variant="outlined" size="small"
+              color={pet?.evolutionStage >= 3 ? 'secondary' : 'default'}
+            />
           </Box>
 
           {/* Experience bar */}
           <Box sx={{ px: 4, mt: 2 }}>
-            <Typography variant="caption" color="text.secondary">
-              XP: {pet.experience} / {pet.experienceToNextLevel}
-            </Typography>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+              <Typography variant="caption" color="text.secondary">XP</Typography>
+              <Typography variant="caption" color="text.secondary">
+                {pet?.experience} / {pet?.experienceToNextLevel}
+              </Typography>
+            </Box>
             <LinearProgress
               variant="determinate"
-              value={(pet.experience / pet.experienceToNextLevel) * 100}
-              sx={{ height: 8, borderRadius: 4, mt: 0.5 }}
+              value={pet ? (pet.experience / pet.experienceToNextLevel) * 100 : 0}
+              sx={{ height: 8, borderRadius: 4, mt: 0.5, bgcolor: '#E8EAF6' }}
             />
           </Box>
         </Card>
 
+        {/* Action message */}
+        <Collapse in={!!message}>
+          <Paper sx={{
+            mb: 2, p: 1.5, textAlign: 'center', bgcolor: '#E8F5E9', borderRadius: 2,
+            border: '1px solid #A5D6A7'
+          }}>
+            <Typography variant="body2" fontWeight={600} color="#2E7D32">{message}</Typography>
+          </Paper>
+        </Collapse>
+
         {/* Stats */}
-        <Card sx={{ mb: 2 }}>
-          <CardContent>
-            <Typography variant="h6" fontWeight={700} sx={{ mb: 2 }}>Estado do {pet.name}</Typography>
-            <StatBar label="Fome" value={pet.hunger} color="#FF9800" />
-            <StatBar label="Felicidade" value={pet.happiness} color="#E91E63" />
-            <StatBar label="Energia" value={pet.energy} color="#2196F3" />
-            <StatBar label="Saúde" value={pet.health} color="#4CAF50" />
+        <Card sx={{ mb: 2, borderRadius: 3 }}>
+          <CardContent sx={{ p: 2.5 }}>
+            <Typography variant="h6" fontWeight={700} sx={{ mb: 2 }}>
+              Estado do {pet?.name}
+            </Typography>
+            <StatBar label="Fome" value={pet?.hunger || 0} color="#FF9800" />
+            <StatBar label="Felicidade" value={pet?.happiness || 0} color="#E91E63" />
+            <StatBar label="Energia" value={pet?.energy || 0} color="#2196F3" />
+            <StatBar label="Saúde" value={pet?.health || 0} color="#4CAF50" />
           </CardContent>
         </Card>
 
         {/* Actions */}
-        <Grid container spacing={2} sx={{ mb: 2 }}>
-          <Grid item xs={6}>
+        <Grid container spacing={1.5} sx={{ mb: 2 }}>
+          <Grid item xs={4}>
             <Button
-              variant="contained"
-              fullWidth
-              size="large"
+              variant="contained" fullWidth size="large"
               startIcon={<FeedIcon />}
               onClick={() => setFeedDialogOpen(true)}
-              sx={{ py: 2 }}
+              sx={{
+                py: 2, borderRadius: 3, flexDirection: 'column',
+                bgcolor: '#FF9800', '&:hover': { bgcolor: '#F57C00' },
+                minHeight: 80
+              }}
             >
-              Alimentar
+              <Typography variant="caption">Alimentar</Typography>
             </Button>
           </Grid>
-          <Grid item xs={6}>
+          <Grid item xs={4}>
             <Button
-              variant="outlined"
-              fullWidth
-              size="large"
+              variant="contained" fullWidth size="large"
               startIcon={<HeartIcon />}
-              sx={{ py: 2 }}
+              onClick={handlePet}
+              sx={{
+                py: 2, borderRadius: 3, flexDirection: 'column',
+                bgcolor: '#E91E63', '&:hover': { bgcolor: '#C2185B' },
+                minHeight: 80
+              }}
             >
-              Acariciar
+              <Typography variant="caption">Acariciar</Typography>
+            </Button>
+          </Grid>
+          <Grid item xs={4}>
+            <Button
+              variant="contained" fullWidth size="large"
+              startIcon={<PlayIcon />}
+              onClick={handlePlay}
+              sx={{
+                py: 2, borderRadius: 3, flexDirection: 'column',
+                bgcolor: '#2196F3', '&:hover': { bgcolor: '#1976D2' },
+                minHeight: 80
+              }}
+            >
+              <Typography variant="caption">Brincar</Typography>
             </Button>
           </Grid>
         </Grid>
 
+        {/* Evolution Guide */}
+        <Card sx={{ mb: 2, borderRadius: 3, bgcolor: '#F3E5F5' }}>
+          <CardContent sx={{ p: 2.5 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5 }}>
+              <SparkleIcon sx={{ color: '#9C27B0' }} />
+              <Typography variant="h6" fontWeight={700}>Evolução</Typography>
+            </Box>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              {[
+                { stage: 1, label: '🥚 Ovo', level: 'Início' },
+                { stage: 2, label: '🐣 Bebé', level: 'Nv.5' },
+                { stage: 3, label: '🐾 Jovem', level: 'Nv.10' },
+                { stage: 4, label: '👑 Adulto', level: 'Nv.15' }
+              ].map((s, i, arr) => (
+                <React.Fragment key={s.stage}>
+                  <Box sx={{
+                    textAlign: 'center', opacity: (pet?.evolutionStage || 1) >= s.stage ? 1 : 0.4,
+                    transition: 'opacity 0.3s'
+                  }}>
+                    <Typography sx={{ fontSize: 24 }}>{s.label.split(' ')[0]}</Typography>
+                    <Typography variant="caption" fontWeight={600}>{s.label.split(' ')[1]}</Typography>
+                    <Typography variant="caption" display="block" color="text.secondary">{s.level}</Typography>
+                  </Box>
+                  {i < arr.length - 1 && (
+                    <Box sx={{
+                      flex: 1, height: 2, mx: 0.5,
+                      bgcolor: (pet?.evolutionStage || 1) > s.stage ? '#9C27B0' : '#E0E0E0',
+                      borderRadius: 1
+                    }} />
+                  )}
+                </React.Fragment>
+              ))}
+            </Box>
+          </CardContent>
+        </Card>
+
         {/* Info */}
-        <Card>
-          <CardContent>
+        <Card sx={{ borderRadius: 3 }}>
+          <CardContent sx={{ p: 2.5 }}>
             <Typography variant="h6" fontWeight={700} sx={{ mb: 1 }}>Informações</Typography>
-            <Typography variant="body2" color="text.secondary">
-              Vezes alimentado: {pet.feedCount}
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              Pontos gastos: {pet.totalPointsSpent}
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              Última alimentação: {pet.lastFed ? new Date(pet.lastFed).toLocaleDateString('pt-PT') : '-'}
-            </Typography>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
+              <Typography variant="body2" color="text.secondary">Vezes alimentado</Typography>
+              <Typography variant="body2" fontWeight={600}>{pet?.feedCount || 0}</Typography>
+            </Box>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
+              <Typography variant="body2" color="text.secondary">Pontos gastou</Typography>
+              <Typography variant="body2" fontWeight={600}>{pet?.totalPointsSpent || 0}</Typography>
+            </Box>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+              <Typography variant="body2" color="text.secondary">Última refeição</Typography>
+              <Typography variant="body2" fontWeight={600}>
+                {pet?.lastFed ? new Date(pet.lastFed).toLocaleDateString('pt-PT') : '-'}
+              </Typography>
+            </Box>
           </CardContent>
         </Card>
       </Box>
 
       {/* Feed Dialog */}
-      <Dialog open={feedDialogOpen} onClose={() => setFeedDialogOpen(false)} fullWidth maxWidth="xs">
-        <DialogTitle>Alimentar {pet.name}</DialogTitle>
+      <Dialog open={feedDialogOpen} onClose={() => setFeedDialogOpen(false)} fullWidth maxWidth="xs"
+        sx={{ '& .MuiDialog-paper': { borderRadius: 3, mx: 2 } }}>
+        <DialogTitle fontWeight={700}>Alimentar {pet?.name}</DialogTitle>
         <DialogContent>
           <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-            Use os seus pontos ({user?.totalPoints || 0} disponíveis) para alimentar o seu animal.
+            Use os seus pontos ({user?.totalPoints || 0} disponíveis) para alimentar {pet?.name}.
+            Cada ponto dá XP e aumenta a fome!
           </Typography>
-          <Typography variant="h6" textAlign="center" sx={{ mb: 1 }}>
+          <Typography variant="h6" textAlign="center" sx={{ mb: 1, color: 'primary.main' }}>
             {feedPoints} pontos
           </Typography>
           <Slider
@@ -266,17 +388,16 @@ const PetPage = () => {
             onChange={(_, v) => setFeedPoints(v)}
             min={1}
             max={Math.min(50, user?.totalPoints || 1)}
-            marks
+            marks={[{ value: 1, label: '1' }, { value: 25, label: '25' }, { value: 50, label: '50' }]}
             valueLabelDisplay="auto"
+            sx={{ color: '#FF9800' }}
           />
         </DialogContent>
-        <DialogActions>
+        <DialogActions sx={{ p: 2 }}>
           <Button onClick={() => setFeedDialogOpen(false)}>Cancelar</Button>
-          <Button
-            variant="contained"
-            onClick={handleFeed}
+          <Button variant="contained" onClick={handleFeed}
             disabled={feedPoints > (user?.totalPoints || 0)}
-          >
+            sx={{ bgcolor: '#FF9800', '&:hover': { bgcolor: '#F57C00' }, borderRadius: 2 }}>
             Alimentar
           </Button>
         </DialogActions>

@@ -1,42 +1,42 @@
 const express = require('express');
 const router = express.Router();
 const { protect } = require('../middleware/auth');
-const { upload, cloudinary } = require('../middleware/upload');
+const { cloudinary } = require('../middleware/upload');
 const Photo = require('../models/Photo');
-const path = require('path');
 
 // @route   POST /api/photos/upload
-// @desc    Upload and save photo to Cloudinary
-router.post('/upload', protect, upload.single('photo'), async (req, res) => {
+// @desc    Upload photo via base64 to Cloudinary (serverless-compatible)
+router.post('/upload', protect, async (req, res) => {
   try {
-    if (!req.file) {
+    const { photo, activityId, originalName } = req.body;
+
+    if (!photo) {
       return res.status(400).json({ success: false, message: 'Nenhuma foto enviada' });
     }
 
-    const { activityId } = req.body;
+    // Upload base64 to Cloudinary
+    const result = await cloudinary.uploader.upload(photo, {
+      folder: 'digital-detox/photos',
+      transformation: [{ width: 1024, height: 1024, crop: 'limit' }]
+    });
 
-    // Cloudinary result is in req.file
-    const photoUrl = req.file.path; // Cloudinary URL
-    const publicId = req.file.filename; // Cloudinary public_id
-
-    // Create photo record
-    const photo = await Photo.create({
+    const photoDoc = await Photo.create({
       uploadedBy: req.user._id,
       activity: activityId || null,
-      originalName: req.file.originalname,
-      filePath: photoUrl,
-      fileType: req.file.mimetype,
-      fileSize: req.file.size,
-      publicId: publicId,
+      originalName: originalName || 'photo.jpg',
+      filePath: result.secure_url,
+      fileType: 'image/jpeg',
+      fileSize: result.bytes || 0,
+      publicId: result.public_id,
       status: 'pending'
     });
 
     res.status(201).json({
       success: true,
       data: {
-        id: photo._id,
-        filePath: photo.filePath,
-        status: photo.status,
+        id: photoDoc._id,
+        filePath: photoDoc.filePath,
+        status: photoDoc.status,
         message: 'Foto enviada com sucesso. Pendente validação.'
       }
     });

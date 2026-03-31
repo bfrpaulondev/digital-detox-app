@@ -32,19 +32,40 @@ const DashboardPage = () => {
 
   const loadDashboard = async () => {
     try {
-      const [statsRes] = await Promise.all([
-        dashboardAPI.getStats(),
-        activityAPI.getAll({ status: 'pendente', limit: 5 })
-      ]);
-      setStats(statsRes.data.data);
+      // Load stats first (critical)
+      let statsData = null;
+      try {
+        const statsRes = await dashboardAPI.getStats();
+        statsData = statsRes.data.data;
+      } catch (statsError) {
+        console.error('Stats error:', statsError);
+        // Provide fallback stats from user data
+        statsData = {
+          totalPoints: user?.totalPoints || 0,
+          level: user?.level || 1,
+          currentStreak: user?.currentStreak || 0,
+          longestStreak: user?.longestStreak || 0,
+          completedActivities: 0,
+          pendingActivities: 0,
+          pet: null,
+          achievementCount: 0
+        };
+      }
+      setStats(statsData);
 
-      // Get AI suggestions for students
+      // Load activities (non-critical)
+      try {
+        await activityAPI.getAll({ status: 'pendente', limit: 5 });
+      } catch (e) {
+        // Silently ignore activity load failure
+      }
+
+      // AI suggestions (non-critical)
       if (user?.role === 'student' && user?.activityPreferences?.length > 0) {
         try {
           const sugRes = await aiAPI.getSuggestions({ preferences: user.activityPreferences });
           setSuggestions(sugRes.data.data?.suggestions || []);
         } catch (e) {
-          // Fallback suggestions
           setSuggestions([
             { title: 'Passeio ao ar livre', description: 'Faça um passeio de 30 minutos', estimatedMinutes: 30, pointsValue: 15 },
             { title: 'Leitura', description: 'Leia um livro por 20 minutos', estimatedMinutes: 20, pointsValue: 10 },

@@ -82,11 +82,19 @@ const OutsidePage = () => {
     if (!photoFile) return;
     setUploading(true);
     try {
-      const formData = new FormData();
-      formData.append('photo', photoFile);
-      if (selectedActivity) formData.append('activityId', selectedActivity._id);
+      // Convert file to base64
+      const base64 = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(photoFile);
+      });
 
-      const uploadRes = await photoAPI.upload(formData);
+      const uploadRes = await photoAPI.upload({
+        photo: base64,
+        activityId: selectedActivity?._id,
+        originalName: photoFile.name
+      });
 
       if (uploadRes.data.success) {
         // Analyze with AI
@@ -491,7 +499,16 @@ const OutsidePage = () => {
       </Box>
 
       {/* Photo Upload Dialog */}
-      <Dialog open={photoDialogOpen} onClose={() => { setPhotoDialogOpen(false); setAiResult(null); }} fullWidth maxWidth="sm">
+      <Dialog
+        open={photoDialogOpen}
+        onClose={() => { setPhotoDialogOpen(false); setAiResult(null); }}
+        fullWidth
+        maxWidth="sm"
+        container={document.body}
+        PaperProps={{
+          sx: { position: 'relative' }
+        }}
+      >
         <DialogTitle>
           {aiResult ? 'Resultado da Análise' : 'Provar Atividade com Foto'}
         </DialogTitle>

@@ -161,7 +161,7 @@ const SchoolPage = () => {
         )}
 
         {/* Activities */}
-        {tab !== 2 && (
+        {!(tab === 2 && user?.role === 'teacher') && (
           <>
             {user?.role === 'teacher' && tab === 0 && (
               <Box sx={{ mb: 2 }}>
