@@ -6,9 +6,7 @@ import {
 } from '@mui/material';
 import {
   NaturePeople as OutsideIcon,
-  Add as AddIcon,
   CameraAlt as CameraIcon,
-  Search as SearchIcon,
   CheckCircle as CheckIcon,
   Close as CloseIcon,
   AccessTime as TimeIcon,
@@ -17,8 +15,7 @@ import {
   FamilyRestroom as FamilyIcon,
   Lightbulb as TipIcon,
   Star as StarIcon,
-  TrendingUp as TrendingIcon,
-  Lightbulb as LightbulbIcon
+  TrendingUp as TrendingIcon
 } from '@mui/icons-material';
 import { useSnackbar } from 'notistack';
 import { useAuth } from '../../context/AuthContext';
@@ -183,7 +180,7 @@ const OutsidePage = () => {
           <Typography variant="h6" fontWeight={700} sx={{ mb: 2 }}>Sugestões Personalizadas ✨</Typography>
           {suggestions.length === 0 ? (
             <Paper sx={{ p: 4, textAlign: 'center' }}>
-              <LightbulbIcon sx={{ fontSize: 48, color: 'grey.300', mb: 1 }} />
+              <TipIcon sx={{ fontSize: 48, color: 'grey.300', mb: 1 }} />
               <Typography fontWeight={600} color="text.secondary">Sem sugestões</Typography>
               <Typography variant="body2" color="text.secondary">Define as tuas preferências no perfil para receber sugestões!</Typography>
             </Paper>

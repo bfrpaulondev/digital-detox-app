@@ -6,15 +6,13 @@ import {
   IconButton, Fab, Paper, InputAdornment, MenuItem
 } from '@mui/material';
 import {
-  School as SchoolIcon,
   Assignment as AssignmentIcon,
   CheckCircle as CheckIcon,
   People as PeopleIcon,
   Add as AddIcon,
   Search as SearchIcon,
   Star as StarIcon,
-  Close as CloseIcon,
-  TrendingUp as TrendingIcon
+  Close as CloseIcon
 } from '@mui/icons-material';
 import { useAuth } from '../../context/AuthContext';
 import AppHeader from '../../components/layout/AppHeader';
@@ -71,6 +69,7 @@ const SchoolPage = () => {
 
   useEffect(() => {
     loadData();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loadData]);
 
   const handleCreateActivity = async () => {
