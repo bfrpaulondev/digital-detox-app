@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Avatar, Box } from '@mui/material';
 
 const petEmojis = {

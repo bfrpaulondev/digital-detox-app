@@ -38,7 +38,6 @@ const PetPage = () => {
   const [newPet, setNewPet] = useState({ species: '', name: '' });
   const [loading, setLoading] = useState(true);
   const [excited, setExcited] = useState(false);
-  const [showLove, setShowLove] = useState(false);
   const [message, setMessage] = useState('');
 
   useEffect(() => {
@@ -91,10 +90,9 @@ const PetPage = () => {
   };
 
   const handlePet = () => {
-    setShowLove(true);
     setExcited(true);
     setMessage(`${pet.name} adorou! 💕`);
-    setTimeout(() => { setShowLove(false); setExcited(false); setMessage(''); }, 2000);
+    setTimeout(() => { setExcited(false); setMessage(''); }, 2000);
   };
 
   const handlePlay = () => {
