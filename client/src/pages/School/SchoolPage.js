@@ -32,7 +32,7 @@ const emptyStudent = {
 
 const SchoolPage = () => {
   const { user } = useAuth();
-  const [currentTab, setCurrentTab] = useState('0');
+  const [currentTab, setCurrentTab] = useState(0);
   const [activities, setActivities] = useState([]);
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -74,12 +74,12 @@ const SchoolPage = () => {
   };
 
   useEffect(() => {
-    loadTabData(parseInt(currentTab));
+    loadTabData(currentTab);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentTab]);
 
   const handleTabChange = (event, newValue) => {
-    setCurrentTab(String(newValue));
+    setCurrentTab(newValue);
     setSearchQuery('');
   };
 
@@ -88,7 +88,7 @@ const SchoolPage = () => {
       await activityAPI.create(newActivity);
       setDialogOpen(false);
       setNewActivity({ title: '', description: '', category: 'escola', subject: '', classGroup: '', scheduledDate: '', scheduledTime: '', pointsValue: 10, isMission: false, requiresPhoto: false });
-      loadTabData(parseInt(currentTab));
+      loadTabData(currentTab);
     } catch (e) {
       console.error(e);
     }
@@ -97,18 +97,18 @@ const SchoolPage = () => {
   const handleComplete = async (activityId) => {
     try {
       await activityAPI.complete(activityId);
-      loadTabData(parseInt(currentTab));
+      loadTabData(currentTab);
     } catch (e) { console.error(e); }
   };
 
   const handleValidate = async (activityId, studentId, approved) => {
     try {
       await activityAPI.validate(activityId, { studentId, approved });
-      loadTabData(parseInt(currentTab));
+      loadTabData(currentTab);
     } catch (e) { console.error(e); }
   };
 
-  const tabIndex = parseInt(currentTab);
+  const tabIndex = currentTab;
   const isTeacher = user?.role === 'teacher';
   const emptyState = isTeacher ? emptyTeacher : emptyStudent;
 
@@ -145,15 +145,15 @@ const SchoolPage = () => {
       >
         {isTeacher ? (
           <>
-            <Tab label="Pendentes" icon={<AssignmentIcon />} iconPosition="start" value="0" />
-            <Tab label="Concluídas" icon={<CheckIcon />} iconPosition="start" value="1" />
-            <Tab label="Alunos" icon={<PeopleIcon />} iconPosition="start" value="2" />
+            <Tab label="Pendentes" icon={<AssignmentIcon />} iconPosition="start" />
+            <Tab label="Concluídas" icon={<CheckIcon />} iconPosition="start" />
+            <Tab label="Alunos" icon={<PeopleIcon />} iconPosition="start" />
           </>
         ) : (
           <>
-            <Tab label="Pendentes" icon={<AssignmentIcon />} iconPosition="start" value="0" />
-            <Tab label="Concluídas" icon={<CheckIcon />} iconPosition="start" value="1" />
-            <Tab label="Validadas" icon={<StarIcon />} iconPosition="start" value="2" />
+            <Tab label="Pendentes" icon={<AssignmentIcon />} iconPosition="start" />
+            <Tab label="Concluídas" icon={<CheckIcon />} iconPosition="start" />
+            <Tab label="Validadas" icon={<StarIcon />} iconPosition="start" />
           </>
         )}
       </Tabs>
