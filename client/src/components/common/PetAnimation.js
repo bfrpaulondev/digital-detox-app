@@ -1,17 +1,18 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Box, Typography, keyframes } from '@mui/material';
 
-// Keyframe animations
+// ─── Keyframe Animations ──────────────────────────────────────────────────────
+
 const floatAnim = keyframes`
   0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-8px); }
+  50% { transform: translateY(-10px); }
 `;
 
 const bounceAnim = keyframes`
   0%, 100% { transform: translateY(0px) scale(1); }
-  30% { transform: translateY(-15px) scale(1.05); }
-  50% { transform: translateY(0px) scale(0.95); }
-  70% { transform: translateY(-8px) scale(1.02); }
+  25% { transform: translateY(-18px) scale(1.04); }
+  50% { transform: translateY(0px) scale(0.96); }
+  75% { transform: translateY(-9px) scale(1.02); }
 `;
 
 const wobbleAnim = keyframes`
@@ -21,46 +22,93 @@ const wobbleAnim = keyframes`
 
 const pulseAnim = keyframes`
   0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.7; transform: scale(1.1); }
+  50% { opacity: 0.75; transform: scale(1.08); }
 `;
 
 const sleepAnim = keyframes`
   0%, 100% { transform: translateY(0px) rotate(-2deg); }
-  50% { transform: translateY(2px) rotate(2deg); }
+  50% { transform: translateY(3px) rotate(2deg); }
 `;
 
-// excitedAnim defined below
-// const excitedAnim = keyframes`
-//   0% { transform: translateY(0) rotate(0deg); }
-//   15% { transform: translateY(-20px) rotate(-5deg); }
-//   30% { transform: translateY(-5px) rotate(5deg); }
-//   45% { transform: translateY(-18px) rotate(-3deg); }
-//   60% { transform: translateY(0) rotate(3deg); }
-//   75% { transform: translateY(-12px) rotate(-2deg); }
-//   100% { transform: translateY(0) rotate(0deg); }
-// `;
+const excitedAnim = keyframes`
+  0% { transform: translateY(0) rotate(0deg); }
+  12% { transform: translateY(-22px) rotate(-4deg); }
+  24% { transform: translateY(-4px) rotate(4deg); }
+  36% { transform: translateY(-18px) rotate(-3deg); }
+  50% { transform: translateY(0) rotate(2deg); }
+  62% { transform: translateY(-12px) rotate(-2deg); }
+  75% { transform: translateY(0) rotate(1deg); }
+  87% { transform: translateY(-6px) rotate(-1deg); }
+  100% { transform: translateY(0) rotate(0deg); }
+`;
 
 const heartFloat = keyframes`
-  0% { opacity: 1; transform: translateY(0) scale(0.5); }
-  50% { opacity: 0.8; transform: translateY(-30px) scale(1); }
-  100% { opacity: 0; transform: translateY(-60px) scale(0.3); }
+  0% { opacity: 1; transform: translateY(0) scale(0.5) rotate(0deg); }
+  40% { opacity: 1; transform: translateY(-25px) scale(1.1) rotate(-8deg); }
+  100% { opacity: 0; transform: translateY(-65px) scale(0.4) rotate(10deg); }
 `;
 
 const glowAnim = keyframes`
-  0%, 100% { filter: drop-shadow(0 0 8px rgba(108,99,255,0.3)); }
-  50% { filter: drop-shadow(0 0 20px rgba(108,99,255,0.7)); }
+  0%, 100% { filter: drop-shadow(0 0 8px rgba(108,99,255,0.25)); }
+  50% { filter: drop-shadow(0 0 22px rgba(108,99,255,0.65)); }
 `;
 
 const sparkleAnim = keyframes`
-  0%, 100% { opacity: 0; transform: scale(0); }
-  50% { opacity: 1; transform: scale(1); }
+  0%, 100% { opacity: 0; transform: scale(0) rotate(0deg); }
+  50% { opacity: 1; transform: scale(1) rotate(180deg); }
 `;
 
 const zzzAnim = keyframes`
-  0% { opacity: 0; transform: translate(0, 0) scale(0.8); }
-  50% { opacity: 1; transform: translate(15px, -20px) scale(1.2); }
-  100% { opacity: 0; transform: translate(30px, -40px) scale(0.6); }
+  0% { opacity: 0; transform: translate(0, 0) scale(0.7); }
+  40% { opacity: 1; transform: translate(12px, -18px) scale(1.2); }
+  100% { opacity: 0; transform: translate(28px, -42px) scale(0.5); }
 `;
+
+const foodFloat = keyframes`
+  0% { opacity: 1; transform: translateY(0) scale(0.6); }
+  30% { opacity: 1; transform: translateY(-15px) scale(1.1); }
+  100% { opacity: 0; transform: translateY(-55px) scale(0.3); }
+`;
+
+const starBurst = keyframes`
+  0% { opacity: 1; transform: translate(0, 0) scale(0.5) rotate(0deg); }
+  60% { opacity: 0.9; transform: translate(var(--tx), var(--ty)) scale(1.2) rotate(200deg); }
+  100% { opacity: 0; transform: translate(calc(var(--tx) * 1.4), calc(var(--ty) * 1.4)) scale(0.3) rotate(360deg); }
+`;
+
+const happyBounce = keyframes`
+  0%, 100% { transform: translateY(0) scale(1); }
+  20% { transform: translateY(-14px) scale(1.06); }
+  40% { transform: translateY(0) scale(0.97); }
+  60% { transform: translateY(-7px) scale(1.03); }
+  80% { transform: translateY(0) scale(0.99); }
+`;
+
+const eatAnim = keyframes`
+  0%, 100% { transform: rotate(0deg); }
+  15% { transform: rotate(4deg) translateY(2px); }
+  30% { transform: rotate(-2deg); }
+  45% { transform: rotate(3deg) translateY(1px); }
+  60% { transform: rotate(0deg); }
+`;
+
+const tailWag = keyframes`
+  0%, 100% { transform: rotate(-12deg); }
+  50% { transform: rotate(12deg); }
+`;
+
+const shimmerAnim = keyframes`
+  0%, 100% { opacity: 0.15; }
+  50% { opacity: 0.45; }
+`;
+
+const blushPop = keyframes`
+  0% { opacity: 0; transform: scale(0.5); }
+  50% { opacity: 0.7; transform: scale(1.15); }
+  100% { opacity: 0.55; transform: scale(1); }
+`;
+
+// ─── Constants ────────────────────────────────────────────────────────────────
 
 const stageDescriptions = {
   1: 'Sou um ovinho! Alimenta-me para eu eclodir!',
@@ -75,9 +123,10 @@ const moodAnimations = {
   feliz: floatAnim,
   triste: sleepAnim,
   sonolento: sleepAnim,
-  energico: bounceAnim,
+  energico: excitedAnim,
   com_fome: wobbleAnim,
-  brincalhao: floatAnim
+  brincalhao: bounceAnim,
+  doente: wobbleAnim
 };
 
 const speciesColors = {
@@ -87,23 +136,82 @@ const speciesColors = {
   tartaruga: { primary: '#66BB6A', secondary: '#43A047', accent: '#A5D6A7', nose: '#2E7D32', inner: '#C8E6C9' }
 };
 
+const sizeScales = { 1: 1.0, 2: 0.65, 3: 0.82, 4: 1.0 };
+
+// ─── Particle Effect Components ──────────────────────────────────────────────
+
+const FoodParticles = ({ show }) => {
+  if (!show) return null;
+  const foods = ['🍖', '🥕', '🍎', '🐟', '🧀', '🍗'];
+  const particles = [
+    { left: '25%', delay: '0s', emoji: foods[0] },
+    { left: '45%', delay: '0.2s', emoji: foods[1] },
+    { left: '65%', delay: '0.1s', emoji: foods[2] },
+    { left: '35%', delay: '0.35s', emoji: foods[3] },
+    { left: '55%', delay: '0.25s', emoji: foods[4] },
+    { left: '75%', delay: '0.15s', emoji: foods[5] }
+  ];
+  return (
+    <Box sx={{ position: 'absolute', top: '15%', left: 0, right: 0, pointerEvents: 'none', zIndex: 10 }}>
+      {particles.map((p, i) => (
+        <Box key={i} sx={{
+          position: 'absolute', left: p.left, fontSize: 18,
+          animation: `${foodFloat} 1.2s ease-out ${p.delay} forwards`
+        }}>
+          {p.emoji}
+        </Box>
+      ))}
+    </Box>
+  );
+};
+
 const HeartParticles = ({ show }) => {
   if (!show) return null;
   const hearts = [
-    { left: '30%', delay: '0s', size: 20 },
-    { left: '50%', delay: '0.15s', size: 24 },
-    { left: '70%', delay: '0.3s', size: 18 },
-    { left: '40%', delay: '0.45s', size: 22 },
-    { left: '60%', delay: '0.2s', size: 20 }
+    { left: '28%', delay: '0s', size: 22 },
+    { left: '50%', delay: '0.12s', size: 26 },
+    { left: '72%', delay: '0.24s', size: 20 },
+    { left: '38%', delay: '0.36s', size: 24 },
+    { left: '62%', delay: '0.18s', size: 22 },
+    { left: '20%', delay: '0.3s', size: 18 },
+    { left: '80%', delay: '0.08s', size: 18 }
   ];
   return (
-    <Box sx={{ position: 'absolute', top: '20%', left: 0, right: 0, pointerEvents: 'none' }}>
+    <Box sx={{ position: 'absolute', top: '15%', left: 0, right: 0, pointerEvents: 'none', zIndex: 10 }}>
       {hearts.map((h, i) => (
         <Box key={i} sx={{
           position: 'absolute', left: h.left, fontSize: h.size, color: '#E91E63',
-          animation: `${heartFloat} 1s ease-out ${h.delay} forwards`
+          animation: `${heartFloat} 1.1s ease-out ${h.delay} forwards`,
+          filter: 'drop-shadow(0 0 3px rgba(233,30,99,0.4))'
         }}>
-          ❤
+          {'❤️'}
+        </Box>
+      ))}
+    </Box>
+  );
+};
+
+const StarBurstEffect = ({ show }) => {
+  if (!show) return null;
+  const directions = [
+    { '--tx': '-35px', '--ty': '-30px', left: '45%', top: '25%', delay: '0s' },
+    { '--tx': '30px', '--ty': '-35px', left: '55%', top: '25%', delay: '0.05s' },
+    { '--tx': '-40px', '--ty': '10px', left: '30%', top: '45%', delay: '0.1s' },
+    { '--tx': '40px', '--ty': '10px', left: '70%', top: '45%', delay: '0.08s' },
+    { '--tx': '0px', '--ty': '-40px', left: '50%', top: '15%', delay: '0.12s' },
+    { '--tx': '-25px', '--ty': '-20px', left: '35%', top: '30%', delay: '0.15s' },
+    { '--tx': '25px', '--ty': '-20px', left: '65%', top: '30%', delay: '0.03s' },
+    { '--tx': '35px', '--ty': '-25px', left: '60%', top: '20%', delay: '0.18s' }
+  ];
+  return (
+    <Box sx={{ position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 10 }}>
+      {directions.map((d, i) => (
+        <Box key={i} sx={{
+          position: 'absolute', left: d.left, top: d.top, fontSize: 16,
+          animation: `${starBurst} 0.9s ease-out ${d.delay} forwards`,
+          '--tx': d['--tx'], '--ty': d['--ty']
+        }}>
+          {'⭐'}
         </Box>
       ))}
     </Box>
@@ -112,20 +220,21 @@ const HeartParticles = ({ show }) => {
 
 const SparkleEffect = ({ show }) => {
   if (!show) return null;
-  const sparkles = Array.from({ length: 6 }, (_, i) => ({
-    top: `${10 + Math.random() * 80}%`,
-    left: `${10 + Math.random() * 80}%`,
-    delay: `${i * 0.1}s`,
-    size: 8 + Math.random() * 8
-  }));
+  const sparkles = useMemo(() => Array.from({ length: 8 }, (_, i) => ({
+    top: `${8 + ((i * 37) % 84)}%`,
+    left: `${8 + ((i * 43) % 84)}%`,
+    delay: `${(i * 0.13) % 0.8}s`,
+    size: 7 + ((i * 3) % 7),
+    emoji: i % 3 === 0 ? '✨' : i % 3 === 1 ? '💫' : '⭐'
+  })), []);
   return (
-    <Box sx={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}>
+    <Box sx={{ position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 5 }}>
       {sparkles.map((s, i) => (
         <Box key={i} sx={{
           position: 'absolute', top: s.top, left: s.left, fontSize: s.size,
-          animation: `${sparkleAnim} 0.8s ease-in-out ${s.delay} infinite`
+          animation: `${sparkleAnim} 1s ease-in-out ${s.delay} infinite`
         }}>
-          ✨
+          {s.emoji}
         </Box>
       ))}
     </Box>
@@ -135,13 +244,13 @@ const SparkleEffect = ({ show }) => {
 const ZzzEffect = ({ show }) => {
   if (!show) return null;
   return (
-    <Box sx={{ position: 'absolute', top: '10%', right: '15%', pointerEvents: 'none' }}>
+    <Box sx={{ position: 'absolute', top: '5%', right: '10%', pointerEvents: 'none', zIndex: 10 }}>
       {[0, 1, 2].map(i => (
         <Typography key={i} sx={{
-          position: 'absolute', top: i * 15, right: i * 10,
-          fontSize: 12 + i * 4, fontWeight: 700, color: '#9C27B0',
-          animation: `${zzzAnim} 2s ease-in-out ${i * 0.5}s infinite`,
-          fontFamily: 'monospace'
+          position: 'absolute', top: i * 14, right: i * 10,
+          fontSize: 11 + i * 5, fontWeight: 700, color: '#9C27B0',
+          animation: `${zzzAnim} 2.2s ease-in-out ${i * 0.55}s infinite`,
+          fontFamily: 'monospace', opacity: 0.8
         }}>
           Z
         </Typography>
@@ -150,299 +259,609 @@ const ZzzEffect = ({ show }) => {
   );
 };
 
-// EGG SVG (Stage 1)
-const EggSVG = ({ species, mood, size }) => {
-  const colors = speciesColors[species] || speciesColors.gato;
-  const moodAnim = mood === 'energico' ? bounceAnim : wobbleAnim;
+const BlushEffect = ({ show }) => {
+  if (!show) return null;
   return (
-    <svg width={size} height={size * 1.2} viewBox="0 0 120 140" style={{ animation: `${moodAnim} 3s ease-in-out infinite` }}>
+    <Box sx={{ position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 8 }}>
+      <Box sx={{
+        position: 'absolute', top: '38%', left: '22%', width: 28, height: 16,
+        borderRadius: '50%', background: 'radial-gradient(ellipse, rgba(244,143,177,0.65) 0%, rgba(244,143,177,0) 70%)',
+        animation: `${blushPop} 0.5s ease-out forwards`
+      }} />
+      <Box sx={{
+        position: 'absolute', top: '38%', right: '22%', width: 28, height: 16,
+        borderRadius: '50%', background: 'radial-gradient(ellipse, rgba(244,143,177,0.65) 0%, rgba(244,143,177,0) 70%)',
+        animation: `${blushPop} 0.5s ease-out 0.1s forwards`
+      }} />
+    </Box>
+  );
+};
+
+// ─── Helper: Kawaii Eye Component ─────────────────────────────────────────────
+
+const KawaiiEye = ({ cx, cy, r, closed, big, scl }) => {
+  if (closed) {
+    return (
+      <g>
+        <line x1={cx - r} y1={cy} x2={cx + r} y2={cy} stroke="#333" strokeWidth={scl * 2.5} strokeLinecap="round" />
+      </g>
+    );
+  }
+  const eyeR = big ? r * 1.3 : r;
+  const pupilR = eyeR * 0.65;
+  return (
+    <g>
+      <circle cx={cx} cy={cy} r={eyeR} fill="white" stroke="#333" strokeWidth={scl * 0.8} />
+      <circle cx={cx + scl * 1} cy={cy + scl * 0.5} r={pupilR} fill="#333" />
+      <circle cx={cx - scl * 1.5} cy={cy - scl * 1.5} r={pupilR * 0.45} fill="white" />
+      <circle cx={cx + scl * 1.8} cy={cy + scl * 1} r={pupilR * 0.22} fill="white" />
+    </g>
+  );
+};
+
+// ─── Helper: Crown ────────────────────────────────────────────────────────────
+
+const Crown = ({ x, y, scl, ornate }) => (
+  <g transform={`translate(${x}, ${y}) scale(${scl})`}>
+    <polygon points="15,0 0,14 5,6 3,18 15,9 27,18 25,6 30,14" fill="#FFD700" stroke="#DAA520" strokeWidth="1.2" />
+    <circle cx="8" cy="7" r={ornate ? 2.5 : 2} fill="#E91E63" />
+    <circle cx="15" cy="3" r={ornate ? 2.5 : 2} fill="#2196F3" />
+    <circle cx="22" cy="7" r={ornate ? 2.5 : 2} fill="#4CAF50" />
+    {ornate && <circle cx="15" cy="10" r={1.8} fill="#FF9800" />}
+    {ornate && <line x1="15" y1="0" x2="15" y2="-5" stroke="#FFD700" strokeWidth="1.5" />}
+    {ornate && <circle cx="15" cy="-6" r="2.5" fill="#FFD700" stroke="#DAA520" strokeWidth="0.8" />}
+  </g>
+);
+
+// ─── EGG SVG (Stage 1) ───────────────────────────────────────────────────────
+
+const EggSVG = ({ species, mood, size, interaction }) => {
+  const colors = speciesColors[species] || speciesColors.gato;
+  const baseAnim = mood === 'energico' ? bounceAnim : moodAnimations[mood] || wobbleAnim;
+  const isEating = interaction === 'feed';
+  const anim = isEating ? eatAnim : baseAnim;
+  return (
+    <svg width={size} height={size * 1.25} viewBox="0 0 120 150" style={{ animation: `${anim} 3s ease-in-out infinite` }}>
       {/* Shadow */}
-      <ellipse cx="60" cy="130" rx="35" ry="6" fill="rgba(0,0,0,0.1)" />
-      {/* Egg body */}
-      <ellipse cx="60" cy="65" rx="45" ry="55" fill={colors.primary} />
-      <ellipse cx="60" cy="65" rx="40" ry="50" fill={colors.accent} />
-      {/* Spots */}
-      <circle cx="40" cy="45" r="8" fill={colors.secondary} opacity="0.6" />
-      <circle cx="75" cy="55" r="6" fill={colors.secondary} opacity="0.5" />
-      <circle cx="50" cy="80" r="7" fill={colors.secondary} opacity="0.4" />
-      {/* Shine */}
-      <ellipse cx="45" cy="40" rx="12" ry="20" fill="white" opacity="0.25" />
-      {/* Crack lines based on mood */}
+      <ellipse cx="60" cy="142" rx="38" ry="6" fill="rgba(0,0,0,0.1)" />
+      {/* Egg body with gradient layers */}
+      <ellipse cx="60" cy="72" rx="48" ry="60" fill={colors.secondary} />
+      <ellipse cx="60" cy="72" rx="45" ry="57" fill={colors.primary} />
+      <ellipse cx="56" cy="68" rx="38" ry="48" fill={colors.accent} opacity="0.7" />
+      {/* Colorful speckled pattern */}
+      <circle cx="38" cy="42" r="5" fill={colors.secondary} opacity="0.5" />
+      <circle cx="78" cy="50" r="4" fill={colors.secondary} opacity="0.45" />
+      <circle cx="50" cy="85" r="5.5" fill={colors.secondary} opacity="0.4" />
+      <circle cx="72" cy="78" r="3.5" fill={colors.secondary} opacity="0.5" />
+      <circle cx="42" cy="65" r="3" fill={colors.secondary} opacity="0.35" />
+      <circle cx="80" cy="70" r="4" fill={colors.secondary} opacity="0.3" />
+      <circle cx="55" cy="100" r="3" fill={colors.secondary} opacity="0.35" />
+      {/* Shine / highlight */}
+      <ellipse cx="46" cy="45" rx="14" ry="24" fill="white" opacity="0.22" />
+      <ellipse cx="44" cy="40" rx="7" ry="12" fill="white" opacity="0.18" style={{ animation: `${shimmerAnim} 2.5s ease-in-out infinite` }} />
+      {/* Crack lines for energico mood */}
       {mood === 'energico' && (
-        <>
-          <path d="M55 25 L58 40 L50 50 L60 60" stroke={colors.secondary} strokeWidth="2" fill="none" />
-          <path d="M58 40 L68 35" stroke={colors.secondary} strokeWidth="1.5" fill="none" />
-        </>
+        <g>
+          <path d="M54 22 L57 38 L49 48 L58 56 L54 65" stroke={colors.secondary} strokeWidth="2.5" fill="none" opacity="0.8" />
+          <path d="M57 38 L67 33" stroke={colors.secondary} strokeWidth="1.8" fill="none" opacity="0.7" />
+          <path d="M49 48 L42 45" stroke={colors.secondary} strokeWidth="1.5" fill="none" opacity="0.6" />
+        </g>
       )}
-      {/* Eyes (small dots emerging) */}
-      {mood !== 'sonolento' && (
-        <>
-          <circle cx="48" cy="58" r="4" fill="#333" />
-          <circle cx="72" cy="58" r="4" fill="#333" />
-          <circle cx="46" cy="56" r="1.5" fill="white" />
-          <circle cx="70" cy="56" r="1.5" fill="white" />
-        </>
+      {/* Cute face peeking through */}
+      {mood === 'sonolento' ? (
+        <g>
+          <line x1="47" y1="62" x2="56" y2="62" stroke="#333" strokeWidth="2.5" strokeLinecap="round" />
+          <line x1="66" y1="62" x2="75" y2="62" stroke="#333" strokeWidth="2.5" strokeLinecap="round" />
+          <path d="M56 74 Q61 71 66 74" stroke="#333" strokeWidth="1.5" fill="none" />
+        </g>
+      ) : (
+        <g>
+          <circle cx="51" cy="62" r="4.5" fill="white" stroke="#444" strokeWidth="0.8" />
+          <circle cx="70" cy="62" r="4.5" fill="white" stroke="#444" strokeWidth="0.8" />
+          <circle cx="52.5" cy="63" r="2.8" fill="#333" />
+          <circle cx="71.5" cy="63" r="2.8" fill="#333" />
+          <circle cx="50.5" cy="61" r="1.2" fill="white" />
+          <circle cx="69.5" cy="61" r="1.2" fill="white" />
+          {/* Mouth expressions */}
+          {mood === 'feliz' && <path d="M55 73 Q61 79 67 73" stroke="#333" strokeWidth="1.8" fill="none" />}
+          {mood === 'com_fome' && <ellipse cx="61" cy="74" rx="5" ry="4" fill="#555" />}
+          {mood === 'triste' && <path d="M55 77 Q61 71 67 77" stroke="#333" strokeWidth="1.8" fill="none" />}
+          {mood === 'brincalhao' && <circle cx="61" cy="75" r="3" fill="#555" />}
+          {mood === 'doente' && <path d="M55 76 Q61 80 67 76" stroke="#333" strokeWidth="1.5" fill="none" strokeDasharray="2 2" />}
+        </g>
       )}
-      {mood === 'sonolento' && (
-        <>
-          <line x1="43" y1="58" x2="53" y2="58" stroke="#333" strokeWidth="2.5" strokeLinecap="round" />
-          <line x1="67" y1="58" x2="77" y2="58" stroke="#333" strokeWidth="2.5" strokeLinecap="round" />
-        </>
-      )}
-      {/* Mouth */}
-      {mood === 'feliz' && <path d="M52 68 Q60 75 68 68" stroke="#333" strokeWidth="2" fill="none" />}
-      {mood === 'com_fome' && <ellipse cx="60" cy="70" rx="5" ry="4" fill="#333" />}
-      {mood === 'triste' && <path d="M52 73 Q60 66 68 73" stroke="#333" strokeWidth="2" fill="none" />}
+      {/* Blush cheeks */}
+      <ellipse cx="44" cy="70" rx="5" ry="3" fill="#FFAB91" opacity="0.4" />
+      <ellipse cx="77" cy="70" rx="5" ry="3" fill="#FFAB91" opacity="0.4" />
     </svg>
   );
 };
 
-// CAT SVG (Stages 2-4)
-const CatSVG = ({ species, mood, stage, size }) => {
+// ─── CAT SVG (Stages 2-4) ─────────────────────────────────────────────────────
+
+const CatSVG = ({ species, mood, stage, size, interaction }) => {
   const colors = speciesColors[species] || speciesColors.gato;
-  const scl = stage === 2 ? 0.7 : stage === 3 ? 0.85 : 1;
-  const bodyH = scl * 45;
+  const scl = sizeScales[stage] || 1;
+  const isEating = interaction === 'feed';
+  const isPetting = interaction === 'pet';
+  const isPlaying = interaction === 'play';
+  const anim = isPlaying ? excitedAnim : isEating ? eatAnim : moodAnimations[mood] || floatAnim;
+  const isChibi = stage === 2;
+  const isAdult = stage === 4;
+
+  // Proportions per stage
+  const headR = isChibi ? 34 : isAdult ? 30 : 31;
+  const bodyRx = isChibi ? 24 : isAdult ? 30 : 27;
+  const bodyRy = isChibi ? 20 : isAdult ? 36 : 28;
+  const bodyCy = isChibi ? 100 : 108;
+  const headCy = isChibi ? 52 : 56;
+  const eyeR = isChibi ? 6.5 : isAdult ? 5.5 : 6;
+  const earH = isChibi ? 22 : isAdult ? 20 : 21;
 
   return (
-    <svg width={size} height={size * 1.1} viewBox="0 0 140 150" style={{ animation: `${moodAnimations[mood]} 2.5s ease-in-out infinite` }}>
+    <svg width={size} height={size * 1.15} viewBox="0 0 140 160" style={{ animation: `${anim} ${isPlaying ? '1s' : '2.5s'} ease-in-out infinite` }}>
       {/* Shadow */}
-      <ellipse cx="70" cy="140" rx={30 * scl} ry="5" fill="rgba(0,0,0,0.08)" />
-      {/* Tail */}
-      <path d={`M${95 * scl} ${110 - bodyH * 0.3} Q${115 * scl} ${90 - bodyH * 0.5} ${105 * scl} ${70 - bodyH * 0.4}`}
-        stroke={colors.secondary} strokeWidth={scl * 6} fill="none" strokeLinecap="round"
-        style={{ transformOrigin: `${95 * scl}px ${110 - bodyH * 0.3}px` }} />
+      <ellipse cx="70" cy="152" rx={30 * scl} ry="5" fill="rgba(0,0,0,0.08)" />
+      {/* Tail - fluffier */}
+      <path
+        d={`M${96 * scl} ${bodyCy - bodyRy * 0.4} Q${118 * scl} ${bodyCy - bodyRy * 1.2} ${112 * scl} ${bodyCy - bodyRy * 1.6} Q${106 * scl} ${bodyCy - bodyRy * 1.9} ${108 * scl} ${bodyCy - bodyRy * 2}`}
+        stroke={colors.secondary} strokeWidth={scl * 7} fill="none" strokeLinecap="round"
+        style={{ transformOrigin: `${96 * scl}px ${bodyCy - bodyRy * 0.4}px` }}
+      />
+      <path
+        d={`M${96 * scl} ${bodyCy - bodyRy * 0.4} Q${118 * scl} ${bodyCy - bodyRy * 1.2} ${112 * scl} ${bodyCy - bodyRy * 1.6}`}
+        stroke={colors.primary} strokeWidth={scl * 4} fill="none" strokeLinecap="round"
+      />
       {/* Body */}
-      <ellipse cx="70" cy={115 - bodyH * 0.2} rx={28 * scl} ry={bodyH * 0.4} fill={colors.primary} />
+      <ellipse cx="70" cy={bodyCy} rx={bodyRx * scl} ry={bodyRy * scl} fill={colors.primary} />
       {/* Belly */}
-      <ellipse cx="70" cy={115 - bodyH * 0.15} rx={18 * scl} ry={bodyH * 0.28} fill={colors.accent} />
+      <ellipse cx="70" cy={bodyCy + 3} rx={(bodyRx - 8) * scl} ry={(bodyRy - 6) * scl} fill={colors.accent} />
+      {/* Paws */}
+      <ellipse cx={52 * scl} cy={bodyCy + bodyRy * scl - 2} rx={isChibi ? 9 * scl : 8 * scl} ry={5 * scl} fill={colors.secondary} />
+      <ellipse cx={88 * scl} cy={bodyCy + bodyRy * scl - 2} rx={isChibi ? 9 * scl : 8 * scl} ry={5 * scl} fill={colors.secondary} />
+      {/* Paw pads */}
+      <ellipse cx={52 * scl} cy={bodyCy + bodyRy * scl} rx={4 * scl} ry={2.5 * scl} fill={colors.inner} />
+      <ellipse cx={88 * scl} cy={bodyCy + bodyRy * scl} rx={4 * scl} ry={2.5 * scl} fill={colors.inner} />
       {/* Head */}
-      <circle cx="70" cy={55 * scl} r={28 * scl} fill={colors.primary} />
-      {/* Ears */}
-      <polygon points={`${45 * scl},${38 * scl} ${38 * scl},${12 * scl} ${55 * scl},${30 * scl}`} fill={colors.primary} />
-      <polygon points={`${95 * scl},${38 * scl} ${102 * scl},${12 * scl} ${85 * scl},${30 * scl}`} fill={colors.primary} />
-      <polygon points={`${47 * scl},${36 * scl} ${42 * scl},${18 * scl} ${54 * scl},${32 * scl}`} fill={colors.inner} />
-      <polygon points={`${93 * scl},${36 * scl} ${98 * scl},${18 * scl} ${86 * scl},${32 * scl}`} fill={colors.inner} />
-      {/* Face */}
-      {/* Eyes */}
+      <circle cx="70" cy={headCy} r={headR * scl} fill={colors.primary} />
+      {/* Ears - pointed with inner detail */}
+      <polygon
+        points={`${70 - headR * 0.7 * scl},${headCy - headR * 0.6 * scl} ${70 - headR * 0.85 * scl},${headCy - headR * 0.6 * scl - earH * scl} ${70 - headR * 0.2 * scl},${headCy - headR * 0.75 * scl}`}
+        fill={colors.primary}
+      />
+      <polygon
+        points={`${70 + headR * 0.7 * scl},${headCy - headR * 0.6 * scl} ${70 + headR * 0.85 * scl},${headCy - headR * 0.6 * scl - earH * scl} ${70 + headR * 0.2 * scl},${headCy - headR * 0.75 * scl}`}
+        fill={colors.primary}
+      />
+      {/* Inner ears */}
+      <polygon
+        points={`${70 - headR * 0.62 * scl},${headCy - headR * 0.58 * scl} ${70 - headR * 0.78 * scl},${headCy - headR * 0.6 * scl - (earH - 4) * scl} ${70 - headR * 0.3 * scl},${headCy - headR * 0.72 * scl}`}
+        fill={colors.inner}
+      />
+      <polygon
+        points={`${70 + headR * 0.62 * scl},${headCy - headR * 0.58 * scl} ${70 + headR * 0.78 * scl},${headCy - headR * 0.6 * scl - (earH - 4) * scl} ${70 + headR * 0.3 * scl},${headCy - headR * 0.72 * scl}`}
+        fill={colors.inner}
+      />
+      {/* Face - Eyes */}
       {mood === 'sonolento' ? (
-        <>
-          <line x1={`${55 * scl}`} y1={`${52 * scl}`} x2={`${63 * scl}`} y2={`${52 * scl}`} stroke="#333" strokeWidth={scl * 2.5} strokeLinecap="round" />
-          <line x1={`${77 * scl}`} y1={`${52 * scl}`} x2={`${85 * scl}`} y2={`${52 * scl}`} stroke="#333" strokeWidth={scl * 2.5} strokeLinecap="round" />
-        </>
+        <g>
+          <line x1={`${59 * scl}`} y1={`${headCy - 3 * scl}`} x2={`${67 * scl}`} y2={`${headCy - 3 * scl}`} stroke="#333" strokeWidth={scl * 2.5} strokeLinecap="round" />
+          <line x1={`${73 * scl}`} y1={`${headCy - 3 * scl}`} x2={`${81 * scl}`} y2={`${headCy - 3 * scl}`} stroke="#333" strokeWidth={scl * 2.5} strokeLinecap="round" />
+        </g>
       ) : mood === 'brincalhao' ? (
-        <>
-          <ellipse cx={`${59 * scl}`} cy={`${52 * scl}`} rx={5 * scl} ry={5 * scl} fill="#333" />
-          <line x1={`${77 * scl}`} y1={`${49 * scl}`} x2={`${85 * scl}`} y2={`${49 * scl}`} stroke="#333" strokeWidth={scl * 2.5} strokeLinecap="round" />
-          <circle cx={`${57 * scl}`} cy={`${50 * scl}`} r={1.5 * scl} fill="white" />
-        </>
+        <g>
+          <KawaiiEye cx={63 * scl} cy={headCy - 3 * scl} r={eyeR * scl} closed={false} big scl={scl} />
+          <line x1={`${73 * scl}`} y1={`${headCy - 3 * scl}`} x2={`${81 * scl}`} y2={`${headCy - 3 * scl}`} stroke="#333" strokeWidth={scl * 2.5} strokeLinecap="round" />
+        </g>
       ) : (
-        <>
-          <ellipse cx={`${59 * scl}`} cy={`${52 * scl}`} rx={5 * scl} ry={mood === 'energico' ? 6 * scl : 5 * scl} fill="#333" />
-          <ellipse cx={`${81 * scl}`} cy={`${52 * scl}`} rx={5 * scl} ry={mood === 'energico' ? 6 * scl : 5 * scl} fill="#333" />
-          <circle cx={`${57 * scl}`} cy={`${50 * scl}`} r={1.5 * scl} fill="white" />
-          <circle cx={`${79 * scl}`} cy={`${50 * scl}`} r={1.5 * scl} fill="white" />
-        </>
+        <g>
+          <KawaiiEye cx={63 * scl} cy={headCy - 3 * scl} r={eyeR * scl} closed={false} big={mood === 'energico'} scl={scl} />
+          <KawaiiEye cx={77 * scl} cy={headCy - 3 * scl} r={eyeR * scl} closed={false} big={mood === 'energico'} scl={scl} />
+        </g>
       )}
       {/* Nose */}
-      <ellipse cx="70" cy={`${60 * scl}`} rx={3 * scl} ry={2 * scl} fill={colors.nose} />
+      <path d={`M${67 * scl} ${headCy + 4 * scl} L${70 * scl} ${headCy + 7 * scl} L${73 * scl} ${headCy + 4 * scl} Z`} fill={colors.nose} />
       {/* Mouth */}
-      <path d={`M64 ${63 * scl} Q70 ${67 * scl} 76 ${63 * scl}`} stroke="#333" strokeWidth={scl * 1.5} fill="none" />
-      {mood === 'com_fome' && <ellipse cx="70" cy={`${66 * scl}`} rx={4 * scl} ry={3 * scl} fill="#E91E63" />}
-      {mood === 'triste' && <path d={`M64 ${67 * scl} Q70 ${63 * scl} 76 ${67 * scl}`} stroke="#333" strokeWidth={scl * 1.5} fill="none" />}
+      <path d={`M${64 * scl} ${headCy + 8 * scl} Q${67 * scl} ${headCy + 12 * scl} ${70 * scl} ${headCy + 9 * scl} Q${73 * scl} ${headCy + 12 * scl} ${76 * scl} ${headCy + 8 * scl}`} stroke="#333" strokeWidth={scl * 1.3} fill="none" />
+      {mood === 'com_fome' && <ellipse cx="70" cy={headCy + 11 * scl} rx={4 * scl} ry={3.5 * scl} fill="#E91E63" />}
+      {mood === 'triste' && <path d={`M${64 * scl} ${headCy + 12 * scl} Q${70 * scl} ${headCy + 8 * scl} ${76 * scl} ${headCy + 12 * scl}`} stroke="#333" strokeWidth={scl * 1.3} fill="none" />}
+      {mood === 'doente' && <circle cx="70" cy={headCy + 11 * scl} r={3 * scl} fill="#9C27B0" opacity="0.3" />}
       {/* Whiskers */}
-      <line x1={`${35 * scl}`} y1={`${55 * scl}`} x2={`${55 * scl}`} y2={`${58 * scl}`} stroke="#555" strokeWidth={scl * 1} />
-      <line x1={`${35 * scl}`} y1={`${62 * scl}`} x2={`${55 * scl}`} y2={`${62 * scl}`} stroke="#555" strokeWidth={scl * 1} />
-      <line x1={`${85 * scl}`} y1={`${58 * scl}`} x2={`${105 * scl}`} y2={`${55 * scl}`} stroke="#555" strokeWidth={scl * 1} />
-      <line x1={`${85 * scl}`} y1={`${62 * scl}`} x2={`${105 * scl}`} y2={`${62 * scl}`} stroke="#555" strokeWidth={scl * 1} />
-      {/* Paws */}
-      <ellipse cx={`${52 * scl}`} cy={`${120 * scl}`} rx={8 * scl} ry={5 * scl} fill={colors.secondary} />
-      <ellipse cx={`${88 * scl}`} cy={`${120 * scl}`} rx={8 * scl} ry={5 * scl} fill={colors.secondary} />
-      {/* Crown for adult stage */}
-      {stage === 4 && (
-        <g transform={`translate(55, ${12 * scl})`}>
-          <polygon points="15,0 0,12 3,4 0,15 15,8 30,15 27,4 30,12" fill="#FFD700" stroke="#FFA000" strokeWidth="1" />
-          <circle cx="8" cy="6" r="2" fill="#E91E63" />
-          <circle cx="15" cy="3" r="2" fill="#2196F3" />
-          <circle cx="22" cy="6" r="2" fill="#4CAF50" />
-        </g>
-      )}
+      <line x1={`${32 * scl}`} y1={`${headCy + 1 * scl}`} x2={`${56 * scl}`} y2={`${headCy + 3 * scl}`} stroke="#888" strokeWidth={scl * 0.9} />
+      <line x1={`${30 * scl}`} y1={`${headCy + 6 * scl}`} x2={`${55 * scl}`} y2={`${headCy + 6 * scl}`} stroke="#888" strokeWidth={scl * 0.9} />
+      <line x1={`${84 * scl}`} y1={`${headCy + 3 * scl}`} x2={`${108 * scl}`} y2={`${headCy + 1 * scl}`} stroke="#888" strokeWidth={scl * 0.9} />
+      <line x1={`${85 * scl}`} y1={`${headCy + 6 * scl}`} x2={`${110 * scl}`} y2={`${headCy + 6 * scl}`} stroke="#888" strokeWidth={scl * 0.9} />
       {/* Cheeks blush */}
-      <ellipse cx={`${46 * scl}`} cy={`${62 * scl}`} rx={5 * scl} ry={3 * scl} fill="#FFAB91" opacity="0.5" />
-      <ellipse cx={`${94 * scl}`} cy={`${62 * scl}`} rx={5 * scl} ry={3 * scl} fill="#FFAB91" opacity="0.5" />
+      <ellipse cx={`${52 * scl}`} cy={`${headCy + 4 * scl}`} rx={5.5 * scl} ry={3.5 * scl} fill="#FFAB91" opacity={isPetting ? 0.75 : 0.45} />
+      <ellipse cx={`${88 * scl}`} cy={`${headCy + 4 * scl}`} rx={5.5 * scl} ry={3.5 * scl} fill="#FFAB91" opacity={isPetting ? 0.75 : 0.45} />
+      {/* Crown for adult */}
+      {stage === 4 && <Crown x={55} y={headCy - headR * 0.6 * scl - earH * scl - 16} scl={0.9} ornate />}
+      {/* Adult glow ring */}
+      {stage === 4 && (
+        <ellipse cx="70" cy={bodyCy} rx={bodyRx * scl + 8} ry={bodyRy * scl + 8}
+          fill="none" stroke="rgba(255,215,0,0.15)" strokeWidth="3" style={{ animation: `${pulseAnim} 3s ease-in-out infinite` }} />
+      )}
     </svg>
   );
 };
 
-// DOG SVG (Stages 2-4)
-const DogSVG = ({ species, mood, stage, size }) => {
+// ─── DOG SVG (Stages 2-4) ────────────────────────────────────────────────────
+
+const DogSVG = ({ species, mood, stage, size, interaction }) => {
   const colors = speciesColors[species] || speciesColors.cao;
-  const scl = stage === 2 ? 0.7 : stage === 3 ? 0.85 : 1;
+  const scl = sizeScales[stage] || 1;
+  const isEating = interaction === 'feed';
+  const isPetting = interaction === 'pet';
+  const isPlaying = interaction === 'play';
+  const anim = isPlaying ? excitedAnim : isEating ? eatAnim : moodAnimations[mood] || floatAnim;
+  const isChibi = stage === 2;
+  const isAdult = stage === 4;
+
+  const headR = isChibi ? 34 : isAdult ? 30 : 32;
+  const bodyRx = isChibi ? 26 : isAdult ? 32 : 29;
+  const bodyRy = isChibi ? 22 : isAdult ? 38 : 30;
+  const bodyCy = isChibi ? 102 : 110;
+  const headCy = isChibi ? 54 : 58;
+  const eyeR = isChibi ? 6 : isAdult ? 5 : 5.5;
 
   return (
-    <svg width={size} height={size * 1.1} viewBox="0 0 140 150" style={{ animation: `${moodAnimations[mood]} 2.5s ease-in-out infinite` }}>
-      <ellipse cx="70" cy="140" rx={30 * scl} ry="5" fill="rgba(0,0,0,0.08)" />
-      {/* Tail */}
-      <path d={`M${100 * scl} ${95 * scl} Q${125 * scl} ${75 * scl} ${115 * scl} ${60 * scl}`}
-        stroke={colors.secondary} strokeWidth={scl * 8} fill="none" strokeLinecap="round"
-        style={{ animation: mood === 'feliz' || mood === 'brincalhao' ? `${wobbleAnim} 0.4s ease-in-out infinite` : 'none' }} />
+    <svg width={size} height={size * 1.15} viewBox="0 0 140 160" style={{ animation: `${anim} ${isPlaying ? '1s' : '2.5s'} ease-in-out infinite` }}>
+      {/* Shadow */}
+      <ellipse cx="70" cy="152" rx={32 * scl} ry="5" fill="rgba(0,0,0,0.08)" />
+      {/* Tail - fluffy, wagging for feliz */}
+      <g style={{ transformOrigin: `${100 * scl}px ${bodyCy - bodyRy * 0.5}px`, animation: (mood === 'feliz' || mood === 'brincalhao' || isPlaying) ? `${tailWag} 0.35s ease-in-out infinite` : 'none' }}>
+        <path
+          d={`M${100 * scl} ${bodyCy - bodyRy * 0.5} Q${122 * scl} ${bodyCy - bodyRy * 1.3} ${116 * scl} ${bodyCy - bodyRy * 1.8}`}
+          stroke={colors.secondary} strokeWidth={scl * 9} fill="none" strokeLinecap="round"
+        />
+        <path
+          d={`M${100 * scl} ${bodyCy - bodyRy * 0.5} Q${122 * scl} ${bodyCy - bodyRy * 1.3} ${116 * scl} ${bodyCy - bodyRy * 1.8}`}
+          stroke={colors.primary} strokeWidth={scl * 5} fill="none" strokeLinecap="round"
+        />
+      </g>
       {/* Body */}
-      <ellipse cx="70" cy="105" rx={32 * scl} ry={40 * scl} fill={colors.primary} />
-      <ellipse cx="70" cy="110" rx={22 * scl} ry={28 * scl} fill={colors.accent} />
+      <ellipse cx="70" cy={bodyCy} rx={bodyRx * scl} ry={bodyRy * scl} fill={colors.primary} />
+      {/* Belly */}
+      <ellipse cx="70" cy={bodyCy + 4} rx={(bodyRx - 9) * scl} ry={(bodyRy - 8) * scl} fill={colors.accent} />
+      {/* Paws */}
+      <ellipse cx={50 * scl} cy={bodyCy + bodyRy * scl} rx={isChibi ? 10 * scl : 9 * scl} ry={5.5 * scl} fill={colors.secondary} />
+      <ellipse cx={90 * scl} cy={bodyCy + bodyRy * scl} rx={isChibi ? 10 * scl : 9 * scl} ry={5.5 * scl} fill={colors.secondary} />
       {/* Head */}
-      <circle cx="70" cy="55" r={30 * scl} fill={colors.primary} />
-      {/* Floppy ears */}
-      <ellipse cx="35" cy="50" rx={12 * scl} ry={22 * scl} fill={colors.secondary} transform={`rotate(15, 35, 50)`} />
-      <ellipse cx="105" cy="50" rx={12 * scl} ry={22 * scl} fill={colors.secondary} transform={`rotate(-15, 105, 50)`} />
-      {/* Eyes */}
-      {mood === 'sonolento' ? (
+      <circle cx="70" cy={headCy} r={headR * scl} fill={colors.primary} />
+      {/* Floppy ears - bigger, bouncier */}
+      {stage === 4 ? (
+        /* Adult: perky ears */
         <>
-          <line x1={`${55 * scl}`} y1="52" x2={`${63 * scl}`} y2="52" stroke="#333" strokeWidth={scl * 2.5} strokeLinecap="round" />
-          <line x1={`${77 * scl}`} y1="52" x2={`${85 * scl}`} y2="52" stroke="#333" strokeWidth={scl * 2.5} strokeLinecap="round" />
+          <ellipse cx={70 - headR * 0.75 * scl} cy={headCy - headR * 0.5 * scl} rx={10 * scl} ry={18 * scl} fill={colors.secondary} transform={`rotate(-15, ${70 - headR * 0.75 * scl}, ${headCy - headR * 0.5 * scl})`} />
+          <ellipse cx={70 + headR * 0.75 * scl} cy={headCy - headR * 0.5 * scl} rx={10 * scl} ry={18 * scl} fill={colors.secondary} transform={`rotate(15, ${70 + headR * 0.75 * scl}, ${headCy - headR * 0.5 * scl})`} />
+          <ellipse cx={70 - headR * 0.72 * scl} cy={headCy - headR * 0.45 * scl} rx={6 * scl} ry={12 * scl} fill={colors.inner} transform={`rotate(-15, ${70 - headR * 0.72 * scl}, ${headCy - headR * 0.45 * scl})`} />
+          <ellipse cx={70 + headR * 0.72 * scl} cy={headCy - headR * 0.45 * scl} rx={6 * scl} ry={12 * scl} fill={colors.inner} transform={`rotate(15, ${70 + headR * 0.72 * scl}, ${headCy - headR * 0.45 * scl})`} />
         </>
       ) : (
+        /* Baby/Young: floppy ears */
         <>
-          <circle cx={`${59 * scl}`} cy="52" r={5 * scl} fill="#333" />
-          <circle cx={`${81 * scl}`} cy="52" r={5 * scl} fill="#333" />
-          <circle cx={`${57 * scl}`} cy="50" r={1.5 * scl} fill="white" />
-          <circle cx={`${79 * scl}`} cy="50" r={1.5 * scl} fill="white" />
+          <ellipse cx={38 * scl} cy={headCy + 4 * scl} rx={14 * scl} ry={24 * scl} fill={colors.secondary} transform={`rotate(18, ${38 * scl}, ${headCy + 4 * scl})`} />
+          <ellipse cx={102 * scl} cy={headCy + 4 * scl} rx={14 * scl} ry={24 * scl} fill={colors.secondary} transform={`rotate(-18, ${102 * scl}, ${headCy + 4 * scl})`} />
+          <ellipse cx={40 * scl} cy={headCy + 6 * scl} rx={8 * scl} ry={16 * scl} fill={colors.inner} transform={`rotate(18, ${40 * scl}, ${headCy + 6 * scl})`} />
+          <ellipse cx={100 * scl} cy={headCy + 6 * scl} rx={8 * scl} ry={16 * scl} fill={colors.inner} transform={`rotate(-18, ${100 * scl}, ${headCy + 6 * scl})`} />
         </>
+      )}
+      {/* Eyes */}
+      {mood === 'sonolento' ? (
+        <g>
+          <line x1={`${57 * scl}`} y1={`${headCy - 4 * scl}`} x2={`${65 * scl}`} y2={`${headCy - 4 * scl}`} stroke="#333" strokeWidth={scl * 2.5} strokeLinecap="round" />
+          <line x1={`${75 * scl}`} y1={`${headCy - 4 * scl}`} x2={`${83 * scl}`} y2={`${headCy - 4 * scl}`} stroke="#333" strokeWidth={scl * 2.5} strokeLinecap="round" />
+        </g>
+      ) : (
+        <g>
+          <KawaiiEye cx={61 * scl} cy={headCy - 4 * scl} r={eyeR * scl} closed={false} big={mood === 'energico'} scl={scl} />
+          <KawaiiEye cx={79 * scl} cy={headCy - 4 * scl} r={eyeR * scl} closed={false} big={mood === 'energico'} scl={scl} />
+        </g>
+      )}
+      {/* Eyebrows for doente */}
+      {mood === 'doente' && (
+        <g>
+          <line x1={`${57 * scl}`} y1={`${headCy - 12 * scl}`} x2={`${65 * scl}`} y2={`${headCy - 10 * scl}`} stroke="#555" strokeWidth={scl * 1.5} strokeLinecap="round" />
+          <line x1={`${75 * scl}`} y1={`${headCy - 10 * scl}`} x2={`${83 * scl}`} y2={`${headCy - 12 * scl}`} stroke="#555" strokeWidth={scl * 1.5} strokeLinecap="round" />
+        </g>
       )}
       {/* Nose */}
-      <ellipse cx="70" cy="60" rx={4 * scl} ry={3 * scl} fill={colors.nose} />
+      <ellipse cx="70" cy={headCy + 3 * scl} rx={5 * scl} ry={3.5 * scl} fill={colors.nose} />
+      <ellipse cx="69" cy={headCy + 2 * scl} rx={1.5 * scl} ry={1} fill="white" opacity="0.4" />
       {/* Mouth & Tongue */}
-      <path d="M65 63 Q70 68 75 63" stroke="#333" strokeWidth={scl * 1.5} fill="none" />
-      {(mood === 'feliz' || mood === 'brincalhao' || mood === 'energico') && (
-        <ellipse cx="70" cy="70" rx={5 * scl} ry={7 * scl} fill="#E91E63" />
+      <path d={`M${65 * scl} ${headCy + 7 * scl} Q${70 * scl} ${headCy + 12 * scl} ${75 * scl} ${headCy + 7 * scl}`} stroke="#333" strokeWidth={scl * 1.5} fill="none" />
+      {(mood === 'feliz' || mood === 'brincalhao' || mood === 'energico' || isPlaying) && (
+        <ellipse cx="70" cy={headCy + 13 * scl} rx={5 * scl} ry={7 * scl} fill="#F48FB1" />
       )}
-      {mood === 'com_fome' && <ellipse cx="70" cy="70" rx={6 * scl} ry={8 * scl} fill="#333" />}
-      {/* Paws */}
-      <ellipse cx={`${52 * scl}`} cy="130" rx={10 * scl} ry={6 * scl} fill={colors.secondary} />
-      <ellipse cx={`${88 * scl}`} cy="130" rx={10 * scl} ry={6 * scl} fill={colors.secondary} />
+      {mood === 'com_fome' && <ellipse cx="70" cy={headCy + 12 * scl} rx={6 * scl} ry={8 * scl} fill="#555" />}
+      {mood === 'doente' && <path d={`M${65 * scl} ${headCy + 13 * scl} Q${70 * scl} ${headCy + 9 * scl} ${75 * scl} ${headCy + 13 * scl}`} stroke="#333" strokeWidth={scl * 1.3} fill="none" />}
       {/* Cheeks */}
-      <ellipse cx={`${46 * scl}`} cy="62" rx={5 * scl} ry={3 * scl} fill="#FFAB91" opacity="0.5" />
-      <ellipse cx={`${94 * scl}`} cy="62" rx={5 * scl} ry={3 * scl} fill="#FFAB91" opacity="0.5" />
-      {/* Crown */}
+      <ellipse cx={`${50 * scl}`} cy={`${headCy + 5 * scl}`} rx={5.5 * scl} ry={3.5 * scl} fill="#FFAB91" opacity={isPetting ? 0.8 : 0.45} />
+      <ellipse cx={`${90 * scl}`} cy={`${headCy + 5 * scl}`} rx={5.5 * scl} ry={3.5 * scl} fill="#FFAB91" opacity={isPetting ? 0.8 : 0.45} />
+      {/* Crown for adult */}
+      {stage === 4 && <Crown x={55} y={headCy - headR * 0.85 * scl - 16} scl={0.9} ornate />}
+      {/* Adult glow */}
       {stage === 4 && (
-        <g transform={`translate(55, 10)`}>
-          <polygon points="15,0 0,12 3,4 0,15 15,8 30,15 27,4 30,12" fill="#FFD700" stroke="#FFA000" strokeWidth="1" />
-        </g>
+        <ellipse cx="70" cy={bodyCy} rx={bodyRx * scl + 8} ry={bodyRy * scl + 8}
+          fill="none" stroke="rgba(255,215,0,0.15)" strokeWidth="3" style={{ animation: `${pulseAnim} 3s ease-in-out infinite` }} />
       )}
     </svg>
   );
 };
 
-// BIRD SVG (Stages 2-4)
-const BirdSVG = ({ species, mood, stage, size }) => {
+// ─── BIRD SVG (Stages 2-4) ───────────────────────────────────────────────────
+
+const BirdSVG = ({ species, mood, stage, size, interaction }) => {
   const colors = speciesColors[species] || speciesColors.passaro;
-  const scl = stage === 2 ? 0.7 : stage === 3 ? 0.85 : 1;
+  const scl = sizeScales[stage] || 1;
+  const isEating = interaction === 'feed';
+  const isPetting = interaction === 'pet';
+  const isPlaying = interaction === 'play';
+  const anim = isPlaying ? excitedAnim : isEating ? eatAnim : moodAnimations[mood] || floatAnim;
+  const isChibi = stage === 2;
+  const isAdult = stage === 4;
+
+  const headR = isChibi ? 26 : isAdult ? 24 : 25;
+  const bodyRx = isChibi ? 22 : isAdult ? 27 : 24;
+  const bodyRy = isChibi ? 26 : isAdult ? 32 : 28;
+  const headCy = isChibi ? 50 : 52;
+  const headCx = isChibi ? 62 : 60;
+  const eyeR = isChibi ? 5.5 : isAdult ? 5 : 5;
 
   return (
-    <svg width={size} height={size * 1.1} viewBox="0 0 140 150" style={{ animation: `${moodAnimations[mood]} 2.5s ease-in-out infinite` }}>
-      <ellipse cx="70" cy="140" rx={20 * scl} ry="4" fill="rgba(0,0,0,0.08)" />
+    <svg width={size} height={size * 1.15} viewBox="0 0 140 160" style={{ animation: `${anim} ${isPlaying ? '1s' : '2.5s'} ease-in-out infinite` }}>
+      {/* Shadow */}
+      <ellipse cx="70" cy="152" rx={22 * scl} ry="4" fill="rgba(0,0,0,0.08)" />
       {/* Tail feathers */}
-      <path d={`M${90 * scl} 100 L${115 * scl} 80 L${110 * scl} 95 L${120 * scl} 85`} fill={colors.secondary} />
+      <path d={`M${88 * scl} 105 L${118 * scl} 78 L${112 * scl} 95 L${125 * scl} 82`} fill={colors.secondary} opacity="0.9" />
+      {isAdult && <path d={`M${85 * scl} 110 L${115 * scl} 85 L${122 * scl} 90 L${108 * scl} 105`} fill={colors.accent} opacity="0.6" />}
       {/* Body */}
-      <ellipse cx="70" cy="100" rx={25 * scl} ry={30 * scl} fill={colors.primary} />
-      <ellipse cx="70" cy="105" rx={17 * scl} ry={20 * scl} fill={colors.accent} />
-      {/* Wing */}
-      <ellipse cx={`${80 * scl}`} cy="90" rx={18 * scl} ry={12 * scl} fill={colors.secondary}
-        transform={`rotate(-20, ${80 * scl}, 90)`}
-        style={{ animation: (mood === 'energico' || mood === 'brincalhao') ? `${pulseAnim} 0.5s ease-in-out infinite` : 'none' }} />
-      {/* Head */}
-      <circle cx="60" cy="60" r={22 * scl} fill={colors.primary} />
+      <ellipse cx="70" cy={headCy + bodyRy * 1.1} rx={bodyRx * scl} ry={bodyRy * scl} fill={colors.primary} />
+      {/* Belly */}
+      <ellipse cx="70" cy={headCy + bodyRy * 1.1 + 4} rx={(bodyRx - 7) * scl} ry={(bodyRy - 8) * scl} fill={colors.accent} />
+      {/* Wing - fluffier, animated */}
+      <ellipse
+        cx={`${82 * scl}`} cy={headCy + bodyRy * 0.9}
+        rx={isChibi ? 16 * scl : 20 * scl} ry={isChibi ? 11 * scl : 14 * scl}
+        fill={colors.secondary}
+        transform={`rotate(-20, ${82 * scl}, ${headCy + bodyRy * 0.9})`}
+        style={{ animation: (mood === 'energico' || mood === 'brincalhao' || isPlaying) ? `${pulseAnim} 0.4s ease-in-out infinite` : 'none' }}
+      />
+      {/* Head - rounder, bigger */}
+      <circle cx={headCx} cy={headCy} r={headR * scl} fill={colors.primary} />
       {/* Eyes */}
       {mood === 'sonolento' ? (
-        <line x1={`${50 * scl}`} y1="58" x2={`${56 * scl}`} y2="58" stroke="#333" strokeWidth={scl * 2} strokeLinecap="round" />
+        <line x1={`${(headCx - 6) * scl}`} y1={`${headCy - 2 * scl}`} x2={`${(headCx + 6) * scl}`} y2={`${headCy - 2 * scl}`} stroke="#333" strokeWidth={scl * 2.2} strokeLinecap="round" />
       ) : (
-        <>
-          <circle cx={`${53 * scl}`} cy="57" r={4 * scl} fill="#333" />
-          <circle cx={`${51 * scl}`} cy="55" r={1.5 * scl} fill="white" />
-        </>
+        <KawaiiEye cx={(headCx - 5) * scl} cy={headCy - 2 * scl} r={eyeR * scl} closed={false} big={mood === 'energico'} scl={scl} />
       )}
       {/* Beak */}
-      <polygon points={`${72 * scl},55 ${88 * scl},60 ${72 * scl},63`} fill={colors.nose} />
-      {mood === 'com_fome' && <polygon points={`${72 * scl},57 ${85 * scl},60 ${72 * scl},63`} fill="#F44336" />}
-      {/* Cheek */}
-      <ellipse cx={`${66 * scl}`} cy="65" rx={4 * scl} ry={2.5 * scl} fill="#FFAB91" opacity="0.5" />
-      {/* Feet */}
-      <line x1={`${60 * scl}`} y1="125" x2={`${55 * scl}`} y2="138" stroke={colors.nose} strokeWidth={scl * 2} />
-      <line x1={`${80 * scl}`} y1="125" x2={`${85 * scl}`} y2="138" stroke={colors.nose} strokeWidth={scl * 2} />
-      <line x1={`${50 * scl}`} y1="138" x2={`${60 * scl}`} y2="138" stroke={colors.nose} strokeWidth={scl * 2} />
-      <line x1={`${80 * scl}`} y1="138" x2={`${90 * scl}`} y2="138" stroke={colors.nose} strokeWidth={scl * 2} />
-      {/* Crown */}
-      {stage === 4 && (
-        <g transform="translate(45, 28)">
-          <polygon points="15,0 0,12 3,4 0,15 15,8 30,15 27,4 30,12" fill="#FFD700" stroke="#FFA000" strokeWidth="1" />
+      {(mood === 'feliz' || mood === 'brincalhao' || isPlaying) ? (
+        /* Open beak for happy */
+        <g>
+          <polygon points={`${(headCx + headR * 0.6) * scl},${headCy - 2 * scl} ${(headCx + headR * 1.4) * scl},${headCy - 5 * scl} ${(headCx + headR * 0.6) * scl},${headCy + 1 * scl}`} fill={colors.nose} />
+          <polygon points={`${(headCx + headR * 0.6) * scl},${headCy + 1 * scl} ${(headCx + headR * 1.3) * scl},${headCy + 6 * scl} ${(headCx + headR * 0.6) * scl},${headCy + 5 * scl}`} fill="#EF6C00" />
         </g>
+      ) : (
+        <polygon points={`${(headCx + headR * 0.6) * scl},${headCy - 1 * scl} ${(headCx + headR * 1.35) * scl},${headCy + 3 * scl} ${(headCx + headR * 0.6) * scl},${headCy + 5 * scl}`} fill={colors.nose} />
+      )}
+      {mood === 'com_fome' && <polygon points={`${(headCx + headR * 0.6) * scl},${headCy + 1 * scl} ${(headCx + headR * 1.3) * scl},${headCy + 6 * scl} ${(headCx + headR * 0.6) * scl},${headCy + 5 * scl}`} fill="#F44336" />}
+      {/* Cheek */}
+      <ellipse cx={`${(headCx + 6) * scl}`} cy={`${headCy + 5 * scl}`} rx={5 * scl} ry={3 * scl} fill="#FFAB91" opacity={isPetting ? 0.75 : 0.45} />
+      {/* Feet */}
+      <g>
+        <line x1={`${58 * scl}`} y1={headCy + bodyRy * 2} x2={`${52 * scl}`} y2={headCy + bodyRy * 2 + 13} stroke={colors.nose} strokeWidth={scl * 2.5} />
+        <line x1={`${82 * scl}`} y1={headCy + bodyRy * 2} x2={`${88 * scl}`} y2={headCy + bodyRy * 2 + 13} stroke={colors.nose} strokeWidth={scl * 2.5} />
+        <line x1={`${47 * scl}`} y1={headCy + bodyRy * 2 + 13} x2={`${57 * scl}`} y2={headCy + bodyRy * 2 + 13} stroke={colors.nose} strokeWidth={scl * 2} strokeLinecap="round" />
+        <line x1={`${83 * scl}`} y1={headCy + bodyRy * 2 + 13} x2={`${93 * scl}`} y2={headCy + bodyRy * 2 + 13} stroke={colors.nose} strokeWidth={scl * 2} strokeLinecap="round" />
+      </g>
+      {/* Crest feathers for adult */}
+      {isAdult && (
+        <g>
+          <ellipse cx={headCx * scl} cy={(headCy - headR * 0.9) * scl} rx={4 * scl} ry={10 * scl} fill={colors.secondary} transform={`rotate(-10, ${headCx * scl}, ${(headCy - headR * 0.9) * scl})`} />
+          <ellipse cx={(headCx + 5) * scl} cy={(headCy - headR * 0.95) * scl} rx={3.5 * scl} ry={9 * scl} fill={colors.primary} transform={`rotate(8, ${(headCx + 5) * scl}, ${(headCy - headR * 0.95) * scl})`} />
+          <ellipse cx={(headCx - 5) * scl} cy={(headCy - headR * 0.85) * scl} rx={3 * scl} ry={8 * scl} fill="#FF9800" transform={`rotate(-18, ${(headCx - 5) * scl}, ${(headCy - headR * 0.85) * scl})`} />
+        </g>
+      )}
+      {/* Crown for adult */}
+      {stage === 4 && <Crown x={headCx - 10} y={(headCy - headR * 1.2) * scl - 8} scl={0.75} ornate />}
+      {/* Adult glow */}
+      {stage === 4 && (
+        <ellipse cx="70" cy={headCy + bodyRy * 1.1} rx={bodyRx * scl + 8} ry={bodyRy * scl + 8}
+          fill="none" stroke="rgba(255,215,0,0.15)" strokeWidth="3" style={{ animation: `${pulseAnim} 3s ease-in-out infinite` }} />
       )}
     </svg>
   );
 };
 
-// TURTLE SVG (Stages 2-4)
-const TurtleSVG = ({ species, mood, stage, size }) => {
+// ─── TURTLE SVG (Stages 2-4) ──────────────────────────────────────────────────
+
+const TurtleSVG = ({ species, mood, stage, size, interaction }) => {
   const colors = speciesColors[species] || speciesColors.tartaruga;
-  const scl = stage === 2 ? 0.7 : stage === 3 ? 0.85 : 1;
+  const scl = sizeScales[stage] || 1;
+  const isEating = interaction === 'feed';
+  const isPetting = interaction === 'pet';
+  const isPlaying = interaction === 'play';
+  const anim = isPlaying ? excitedAnim : isEating ? eatAnim : moodAnimations[mood] || floatAnim;
+  const isChibi = stage === 2;
+  const isAdult = stage === 4;
+
+  // Baby: BIG head, small shell, stubby legs
+  // Young: proportional, more detail
+  // Adult: ornate shell, graceful
+  const headR = isChibi ? 22 : isAdult ? 20 : 19;
+  const shellRx = isChibi ? 32 : isAdult ? 42 : 37;
+  const shellRy = isChibi ? 26 : isAdult ? 34 : 30;
+  const shellCy = isChibi ? 95 : 92;
+  const headCy = isChibi ? 52 : 56;
+  const neckLen = isChibi ? 6 : isAdult ? 18 : 12;
+  const legRx = isChibi ? 8 : isAdult ? 12 : 10;
+  const legRy = isChibi ? 6 : isAdult ? 9 : 8;
+  const eyeR = isChibi ? 5.5 : isAdult ? 5 : 4.5;
 
   return (
-    <svg width={size} height={size * 1.1} viewBox="0 0 140 150" style={{ animation: `${moodAnimations[mood]} 3.5s ease-in-out infinite` }}>
-      <ellipse cx="70" cy="138" rx={30 * scl} ry="4" fill="rgba(0,0,0,0.08)" />
-      {/* Legs */}
-      <ellipse cx={`${35 * scl}`} cy="115" rx={12 * scl} ry={8 * scl} fill={colors.primary} />
-      <ellipse cx={`${105 * scl}`} cy="115" rx={12 * scl} ry={8 * scl} fill={colors.primary} />
-      <ellipse cx={`${42 * scl}`} cy="128" rx={8 * scl} ry={5 * scl} fill={colors.primary} />
-      <ellipse cx={`${98 * scl}`} cy="128" rx={8 * scl} ry={5 * scl} fill={colors.primary} />
-      {/* Shell */}
-      <ellipse cx="70" cy="90" rx={38 * scl} ry={35 * scl} fill={colors.secondary} />
-      {/* Shell pattern */}
-      <ellipse cx="70" cy="85" rx={25 * scl} ry={22 * scl} fill={colors.primary} />
-      <line x1="70" y1="63" x2="70" y2="107" stroke={colors.secondary} strokeWidth={scl * 1.5} />
-      <line x1="45" y1="85" x2="95" y2="85" stroke={colors.secondary} strokeWidth={scl * 1.5} />
-      <path d="M55 70 Q70 65 85 70" stroke={colors.secondary} strokeWidth={scl * 1} fill="none" />
-      <path d="M55 100 Q70 105 85 100" stroke={colors.secondary} strokeWidth={scl * 1} fill="none" />
-      {/* Head */}
-      <circle cx="70" cy="55" r={18 * scl} fill={colors.primary} />
-      {/* Eyes */}
-      {mood === 'sonolento' ? (
-        <>
-          <line x1={`${60 * scl}`} y1="52" x2={`${66 * scl}`} y2="52" stroke="#333" strokeWidth={scl * 2} strokeLinecap="round" />
-          <line x1={`${74 * scl}`} y1="52" x2={`${80 * scl}`} y2="52" stroke="#333" strokeWidth={scl * 2} strokeLinecap="round" />
-        </>
-      ) : mood === 'energico' ? (
-        <>
-          <circle cx={`${63 * scl}`} cy="52" r={4 * scl} fill="#333" />
-          <circle cx={`${77 * scl}`} cy="52" r={4 * scl} fill="#333" />
-          <circle cx={`${61 * scl}`} cy="50" r={2 * scl} fill="white" />
-          <circle cx={`${75 * scl}`} cy="50" r={2 * scl} fill="white" />
-        </>
-      ) : (
-        <>
-          <circle cx={`${63 * scl}`} cy="52" r={3.5 * scl} fill="#333" />
-          <circle cx={`${77 * scl}`} cy="52" r={3.5 * scl} fill="#333" />
-          <circle cx={`${62 * scl}`} cy="51" r={1.2 * scl} fill="white" />
-          <circle cx={`${76 * scl}`} cy="51" r={1.2 * scl} fill="white" />
-        </>
-      )}
-      {/* Smile */}
-      {mood === 'feliz' && <path d={`M64 ${60 * scl} Q70 ${65 * scl} 76 ${60 * scl}`} stroke="#333" strokeWidth={scl * 1.5} fill="none" />}
-      {mood === 'com_fome' && <ellipse cx="70" cy={62 * scl} rx={3 * scl} ry={2.5 * scl} fill="#333" />}
-      {/* Crown */}
-      {stage === 4 && (
-        <g transform="translate(55, 25)">
-          <polygon points="15,0 0,12 3,4 0,15 15,8 30,15 27,4 30,12" fill="#FFD700" stroke="#FFA000" strokeWidth="1" />
+    <svg width={size} height={size * 1.15} viewBox="0 0 140 160" style={{ animation: `${anim} ${isPlaying ? '1s' : '3s'} ease-in-out infinite` }}>
+      {/* Shadow */}
+      <ellipse cx="70" cy="152" rx={shellRx * scl} ry="5" fill="rgba(0,0,0,0.08)" />
+
+      {/* Tiny tail */}
+      <path
+        d={`M${70 + shellRx * 0.8 * scl} ${shellCy + shellRy * 0.3 * scl} Q${70 + shellRx * 1.05 * scl} ${shellCy + shellRy * 0.6 * scl} ${70 + shellRx * 0.95 * scl} ${shellCy + shellRy * 0.8 * scl}`}
+        stroke={colors.primary} strokeWidth={scl * 4} fill="none" strokeLinecap="round"
+      />
+
+      {/* Back legs */}
+      <ellipse cx={`${70 - shellRx * 0.55 * scl}`} cy={shellCy + shellRy * 0.55 * scl} rx={legRx * scl} ry={legRy * scl} fill={colors.primary} />
+      <ellipse cx={`${70 + shellRx * 0.55 * scl}`} cy={shellCy + shellRy * 0.55 * scl} rx={legRx * scl} ry={legRy * scl} fill={colors.primary} />
+      {/* Front legs */}
+      <ellipse cx={`${70 - shellRx * 0.65 * scl}`} cy={shellCy - shellRy * 0.15 * scl} rx={legRx * 1.1 * scl} ry={legRy * 1.1 * scl} fill={colors.primary} />
+      <ellipse cx={`${70 + shellRx * 0.65 * scl}`} cy={shellCy - shellRy * 0.15 * scl} rx={legRx * 1.1 * scl} ry={legRy * 1.1 * scl} fill={colors.primary} />
+      {/* Leg highlights */}
+      <ellipse cx={`${70 - shellRx * 0.6 * scl}`} cy={shellCy - shellRy * 0.2 * scl} rx={(legRx * 0.5) * scl} ry={(legRy * 0.5) * scl} fill={colors.accent} opacity="0.5" />
+      <ellipse cx={`${70 + shellRx * 0.6 * scl}`} cy={shellCy - shellRy * 0.2 * scl} rx={(legRx * 0.5) * scl} ry={(legRy * 0.5) * scl} fill={colors.accent} opacity="0.5" />
+
+      {/* Shell - gradient-like layered shapes */}
+      <ellipse cx="70" cy={shellCy} rx={shellRx * scl} ry={shellRy * scl} fill={colors.secondary} />
+      <ellipse cx="70" cy={shellCy - 2} rx={(shellRx - 3) * scl} ry={(shellRy - 3) * scl} fill={colors.primary} />
+      <ellipse cx="68" cy={shellCy - 4} rx={(shellRx - 6) * scl} ry={(shellRy - 6) * scl} fill={colors.secondary} opacity="0.3" />
+
+      {/* Shell patterns */}
+      {isChibi ? (
+        /* Baby: cute hexagonal/honeycomb pattern - simple */
+        <g opacity="0.5">
+          {/* Center hexagon approximation */}
+          <polygon points={`70,${shellCy - 10 * scl} ${78,${shellCy - 5 * scl} ${78,${shellCy + 5 * scl}} 70,${shellCy + 10 * scl} ${62,${shellCy + 5 * scl}} ${62,${shellCy - 5 * scl}}`}
+            fill="none" stroke={colors.secondary} strokeWidth={scl * 1.2} />
+          {/* Small hexagons around */}
+          <polygon points={`70,${shellCy - 18 * scl} ${76,${shellCy - 15 * scl} ${76,${shellCy - 9 * scl}} 70,${shellCy - 12 * scl} ${64,${shellCy - 9 * scl}} ${64,${shellCy - 15 * scl}}`}
+            fill="none" stroke={colors.secondary} strokeWidth={scl * 0.8} />
+          <polygon points={`70,${shellCy + 12 * scl} ${76,${shellCy + 9 * scl} ${76,${shellCy + 15 * scl}} 70,${shellCy + 18 * scl} ${64,${shellCy + 15 * scl}} ${64,${shellCy + 9 * scl}}`}
+            fill="none" stroke={colors.secondary} strokeWidth={scl * 0.8} />
+          <polygon points={`${58 * 1},${shellCy} ${58},${shellCy - 7} ${64},${shellCy - 4} ${64},${shellCy + 4} ${58},${shellCy + 7}`}
+            fill="none" stroke={colors.secondary} strokeWidth={scl * 0.8} />
+          <polygon points={`${82},${shellCy - 4} ${82},${shellCy + 4} ${76},${shellCy + 7} ${76},${shellCy - 7}`}
+            fill="none" stroke={colors.secondary} strokeWidth={scl * 0.8} />
         </g>
+      ) : isAdult ? (
+        /* Adult: ornate shell with multiple pattern rings */
+        <g>
+          {/* Outer ring pattern */}
+          <ellipse cx="70" cy={shellCy} rx={(shellRx - 4) * scl} ry={(shellRy - 4) * scl} fill="none" stroke={colors.accent} strokeWidth={scl * 2} opacity="0.5" />
+          <ellipse cx="70" cy={shellCy} rx={(shellRx - 10) * scl} ry={(shellRy - 10) * scl} fill="none" stroke={colors.secondary} strokeWidth={scl * 1.5} opacity="0.4" />
+          {/* Center star pattern */}
+          <polygon points={`70,${shellCy - 16 * scl} ${76,${shellCy - 4 * scl}} ${70,${shellCy + 16 * scl}} ${64,${shellCy - 4 * scl}}`}
+            fill={colors.secondary} opacity="0.2" stroke={colors.secondary} strokeWidth={scl * 1} />
+          {/* Hexagonal center */}
+          <polygon points={`70,${shellCy - 10 * scl} ${78,${shellCy - 5 * scl} ${78,${shellCy + 5 * scl}} 70,${shellCy + 10 * scl} ${62,${shellCy + 5 * scl}} ${62,${shellCy - 5 * scl}}`}
+            fill={colors.accent} opacity="0.3" stroke={colors.secondary} strokeWidth={scl * 1} />
+          {/* Radiating lines */}
+          {[0, 60, 120, 180, 240, 300].map((angle, i) => {
+            const rad = (angle * Math.PI) / 180;
+            const x1 = 70 + Math.cos(rad) * 12 * scl;
+            const y1 = shellCy + Math.sin(rad) * 10 * scl;
+            const x2 = 70 + Math.cos(rad) * (shellRx - 6) * scl;
+            const y2 = shellCy + Math.sin(rad) * (shellRy - 6) * scl;
+            return <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} stroke={colors.secondary} strokeWidth={scl * 0.8} opacity="0.3" />;
+          })}
+          {/* Outer scallops */}
+          {Array.from({ length: 12 }, (_, i) => {
+            const angle = (i * 30 * Math.PI) / 180;
+            const cx = 70 + Math.cos(angle) * (shellRx - 7) * scl;
+            const cy = shellCy + Math.sin(angle) * (shellRy - 7) * scl;
+            return <circle key={i} cx={cx} cy={cy} r={4 * scl} fill={colors.accent} opacity="0.35" />;
+          })}
+          {/* Shell highlight */}
+          <ellipse cx="62" cy={shellCy - 10} rx={14 * scl} ry={10 * scl} fill="white" opacity="0.1" />
+        </g>
+      ) : (
+        /* Young: medium detail pattern */
+        <g opacity="0.45">
+          <ellipse cx="70" cy={shellCy} rx={(shellRx - 8) * scl} ry={(shellRy - 8) * scl} fill="none" stroke={colors.secondary} strokeWidth={scl * 1.5} />
+          <polygon points={`70,${shellCy - 10 * scl} ${77,${shellCy - 5 * scl} ${77,${shellCy + 5 * scl}} 70,${shellCy + 10 * scl} ${63,${shellCy + 5 * scl}} ${63,${shellCy - 5 * scl}}`}
+            fill="none" stroke={colors.secondary} strokeWidth={scl * 1.2} />
+          {/* Cross lines */}
+          <line x1="70" y1={shellCy - (shellRy - 10) * scl} x2="70" y2={shellCy + (shellRy - 10) * scl} stroke={colors.secondary} strokeWidth={scl * 1} />
+          <line x1={70 - (shellRx - 10) * scl} y1={shellCy} x2={70 + (shellRx - 10) * scl} y2={shellCy} stroke={colors.secondary} strokeWidth={scl * 1} />
+          {/* Corner hexagons */}
+          {[
+            { x: 70 - 16 * scl, y: shellCy - 12 * scl },
+            { x: 70 + 16 * scl, y: shellCy - 12 * scl },
+            { x: 70 - 16 * scl, y: shellCy + 12 * scl },
+            { x: 70 + 16 * scl, y: shellCy + 12 * scl }
+          ].map((pos, i) => (
+            <polygon key={i} points={`${pos.x},${pos.y - 5 * scl} ${pos.x + 4 * scl},${pos.y - 2.5 * scl} ${pos.x + 4 * scl},${pos.y + 2.5 * scl} ${pos.x},${pos.y + 5 * scl} ${pos.x - 4 * scl},${pos.y + 2.5 * scl} ${pos.x - 4 * scl},${pos.y - 2.5 * scl}`}
+              fill="none" stroke={colors.secondary} strokeWidth={scl * 0.8} />
+          ))}
+        </g>
+      )}
+
+      {/* Shell rim highlight */}
+      <path
+        d={`M${70 - shellRx * 0.7} ${shellCy - shellRy * 0.9} Q70 ${shellCy - shellRy * 1.05} ${70 + shellRx * 0.7} ${shellCy - shellRy * 0.9}`}
+        fill="none" stroke="white" strokeWidth={scl * 1.5} opacity="0.2"
+      />
+
+      {/* Neck */}
+      <rect x={70 - 7 * scl} y={headCy + headR * 0.5} width={14 * scl} height={neckLen * scl} rx={7 * scl} fill={colors.primary} />
+
+      {/* Head - BIG for baby, proportional for others */}
+      <circle cx="70" cy={headCy} r={headR * scl} fill={colors.primary} />
+      {/* Head highlight */}
+      <circle cx={66} cy={headCy - headR * 0.2} r={headR * 0.6 * scl} fill="white" opacity="0.1" />
+
+      {/* Eyes - big, round, kawaii, evenly spaced */}
+      {mood === 'sonolento' ? (
+        <g>
+          <line x1={`${60 * scl}`} y1={`${headCy - 2 * scl}`} x2={`${66 * scl}`} y2={`${headCy - 2 * scl}`} stroke="#333" strokeWidth={scl * 2.2} strokeLinecap="round" />
+          <line x1={`${74 * scl}`} y1={`${headCy - 2 * scl}`} x2={`${80 * scl}`} y2={`${headCy - 2 * scl}`} stroke="#333" strokeWidth={scl * 2.2} strokeLinecap="round" />
+        </g>
+      ) : (
+        <g>
+          <KawaiiEye cx={63 * scl} cy={headCy - 2 * scl} r={eyeR * scl} closed={false} big={isChibi || mood === 'energico'} scl={scl} />
+          <KawaiiEye cx={77 * scl} cy={headCy - 2 * scl} r={eyeR * scl} closed={false} big={isChibi || mood === 'energico'} scl={scl} />
+        </g>
+      )}
+
+      {/* Nose - tiny cute dots */}
+      <circle cx={`${66 * scl}`} cy={`${headCy + 5 * scl}`} r={1.2 * scl} fill={colors.nose} />
+      <circle cx={`${74 * scl}`} cy={`${headCy + 5 * scl}`} r={1.2 * scl} fill={colors.nose} />
+
+      {/* Mouth expressions */}
+      {mood === 'feliz' && <path d={`M64 ${headCy + 8 * scl} Q70 ${headCy + 13 * scl} 76 ${headCy + 8 * scl}`} stroke="#333" strokeWidth={scl * 1.5} fill="none" />}
+      {mood === 'com_fome' && <ellipse cx="70" cy={headCy + 10 * scl} rx={3.5 * scl} ry={3 * scl} fill="#555" />}
+      {mood === 'triste' && <path d={`M64 ${headCy + 12 * scl} Q70 ${headCy + 7 * scl} 76 ${headCy + 12 * scl}`} stroke="#333" strokeWidth={scl * 1.5} fill="none" />}
+      {mood === 'brincalhao' && <circle cx="70" cy={headCy + 10 * scl} r={3 * scl} fill="#555" />}
+      {mood === 'doente' && (
+        <g>
+          <path d={`M64 ${headCy + 11 * scl} Q70 ${headCy + 7 * scl} 76 ${headCy + 11 * scl}`} stroke="#333" strokeWidth={scl * 1.3} fill="none" strokeDasharray="2 2" />
+          <circle cx="70" cy={headCy + 13 * scl} r={2 * scl} fill="#9C27B0" opacity="0.3" />
+        </g>
+      )}
+
+      {/* Cheeks - always visible, stronger when petted */}
+      <ellipse cx={`${57 * scl}`} cy={`${headCy + 4 * scl}`} rx={5 * scl} ry={3 * scl} fill="#FFAB91" opacity={isPetting ? 0.8 : 0.45} />
+      <ellipse cx={`${83 * scl}`} cy={`${headCy + 4 * scl}`} rx={5 * scl} ry={3 * scl} fill="#FFAB91" opacity={isPetting ? 0.8 : 0.45} />
+
+      {/* Crown for adult */}
+      {stage === 4 && <Crown x={55} y={headCy - headR * scl - 14} scl={0.85} ornate />}
+
+      {/* Adult glow */}
+      {stage === 4 && (
+        <ellipse cx="70" cy={shellCy} rx={shellRx * scl + 10} ry={shellRy * scl + 10}
+          fill="none" stroke="rgba(255,215,0,0.18)" strokeWidth="3" style={{ animation: `${pulseAnim} 3s ease-in-out infinite` }} />
       )}
     </svg>
   );
 };
 
-// Speech bubble component
+// ─── SpeechBubble ─────────────────────────────────────────────────────────────
+
 const SpeechBubble = ({ text, visible }) => {
   if (!visible) return null;
   return (
     <Box sx={{
       position: 'relative', background: 'white', borderRadius: 3, px: 2.5, py: 1.5,
-      boxShadow: '0 2px 12px rgba(0,0,0,0.1)', mb: 1, maxWidth: 260, mx: 'auto',
+      boxShadow: '0 2px 12px rgba(0,0,0,0.1)', mb: 1, maxWidth: 280, mx: 'auto',
       animation: `${floatAnim} 3s ease-in-out infinite`
     }}>
       <Typography variant="body2" textAlign="center" fontWeight={500} color="text.primary">
@@ -458,39 +877,70 @@ const SpeechBubble = ({ text, visible }) => {
   );
 };
 
-// Main Pet Animation Component
-const PetAnimation = ({ species, mood = 'feliz', evolutionStage = 1, size = 180, onInteract, excited }) => {
+// ─── Main Pet Animation Component ─────────────────────────────────────────────
+
+const PetAnimation = ({ species, mood = 'feliz', evolutionStage = 1, size = 180, onInteract, excited, interaction = null }) => {
   const [hearts, setHearts] = useState(false);
   const [sparkles, setSparkles] = useState(false);
   const [showSpeech, setShowSpeech] = useState(true);
+  const [activeParticles, setActiveParticles] = useState({ food: false, hearts: false, stars: false, blush: false });
 
   useEffect(() => { setShowSpeech(true); }, [evolutionStage]);
+
+  const clearParticle = useCallback((key) => {
+    setActiveParticles(prev => ({ ...prev, [key]: false }));
+  }, []);
+
+  // Handle interaction prop changes
+  useEffect(() => {
+    if (interaction === 'feed') {
+      setActiveParticles(prev => ({ ...prev, food: true }));
+      const t = setTimeout(() => clearParticle('food'), 1500);
+      return () => clearTimeout(t);
+    }
+    if (interaction === 'pet') {
+      setActiveParticles(prev => ({ ...prev, hearts: true, blush: true }));
+      const t1 = setTimeout(() => clearParticle('hearts'), 1400);
+      const t2 = setTimeout(() => clearParticle('blush'), 1800);
+      return () => { clearTimeout(t1); clearTimeout(t2); };
+    }
+    if (interaction === 'play') {
+      setActiveParticles(prev => ({ ...prev, stars: true }));
+      const t = setTimeout(() => clearParticle('stars'), 1200);
+      return () => clearTimeout(t);
+    }
+  }, [interaction, clearParticle]);
 
   const handleTap = useCallback(() => {
     setHearts(true);
     setSparkles(true);
+    setActiveParticles(prev => ({ ...prev, hearts: true, blush: true }));
     setTimeout(() => setHearts(false), 1200);
     setTimeout(() => setSparkles(false), 2000);
+    setTimeout(() => clearParticle('hearts'), 1200);
+    setTimeout(() => clearParticle('blush'), 1600);
     if (onInteract) onInteract();
-  }, [onInteract]);
+  }, [onInteract, clearParticle]);
 
   useEffect(() => {
     if (excited) {
       setSparkles(true);
+      setActiveParticles(prev => ({ ...prev, stars: true }));
       setTimeout(() => setSparkles(false), 2000);
+      setTimeout(() => clearParticle('stars'), 1200);
     }
-  }, [excited]);
+  }, [excited, clearParticle]);
 
   const renderPet = () => {
     if (evolutionStage === 1) {
-      return <EggSVG species={species} mood={mood} size={size} />;
+      return <EggSVG species={species} mood={mood} size={size} interaction={interaction} />;
     }
     switch (species) {
-      case 'gato': return <CatSVG species={species} mood={mood} stage={evolutionStage} size={size} />;
-      case 'cao': return <DogSVG species={species} mood={mood} stage={evolutionStage} size={size} />;
-      case 'passaro': return <BirdSVG species={species} mood={mood} stage={evolutionStage} size={size} />;
-      case 'tartaruga': return <TurtleSVG species={species} mood={mood} stage={evolutionStage} size={size} />;
-      default: return <CatSVG species={species} mood={mood} stage={evolutionStage} size={size} />;
+      case 'gato': return <CatSVG species={species} mood={mood} stage={evolutionStage} size={size} interaction={interaction} />;
+      case 'cao': return <DogSVG species={species} mood={mood} stage={evolutionStage} size={size} interaction={interaction} />;
+      case 'passaro': return <BirdSVG species={species} mood={mood} stage={evolutionStage} size={size} interaction={interaction} />;
+      case 'tartaruga': return <TurtleSVG species={species} mood={mood} stage={evolutionStage} size={size} interaction={interaction} />;
+      default: return <CatSVG species={species} mood={mood} stage={evolutionStage} size={size} interaction={interaction} />;
     }
   };
 
@@ -504,14 +954,19 @@ const PetAnimation = ({ species, mood = 'feliz', evolutionStage = 1, size = 180,
         onClick={handleTap}
         sx={{
           cursor: 'pointer', position: 'relative', display: 'inline-flex',
-          animation: stageGlow ? `${glowAnim} 3s ease-in-out infinite` : 'none',
+          animation: stageGlow ? `${glowAnim} 3s ease-in-out infinite` : (interaction === 'feed' ? `${happyBounce} 0.6s ease-in-out 2` : 'none'),
           transition: 'transform 0.1s',
           '&:active': { transform: 'scale(0.95)' }
         }}
       >
-        <HeartParticles show={hearts} />
-        <SparkleEffect show={sparkles} />
+        {/* Particle effects */}
+        <FoodParticles show={activeParticles.food} />
+        <HeartParticles show={activeParticles.hearts || hearts} />
+        <StarBurstEffect show={activeParticles.stars} />
+        <SparkleEffect show={sparkles || interaction === 'play'} />
         <ZzzEffect show={mood === 'sonolento'} />
+        <BlushEffect show={activeParticles.blush || interaction === 'pet'} />
+
         {renderPet()}
       </Box>
 

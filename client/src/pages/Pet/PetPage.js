@@ -38,6 +38,7 @@ const PetPage = () => {
   const [newPet, setNewPet] = useState({ species: '', name: '' });
   const [loading, setLoading] = useState(true);
   const [excited, setExcited] = useState(false);
+  const [interaction, setInteraction] = useState(null); // 'feed' | 'pet' | 'play' | null
   const [message, setMessage] = useState('');
 
   useEffect(() => {
@@ -80,9 +81,10 @@ const PetPage = () => {
         const updatedUser = { ...user, totalPoints: (user.totalPoints || 0) - feedPoints };
         updateUser(updatedUser);
       }
-      setMessage(`${pet.name} foi alimentado! +${feedPoints} XP`);
+      setInteraction('feed');
       setExcited(true);
-      setTimeout(() => { setExcited(false); setMessage(''); }, 2500);
+      setMessage(`${pet.name} foi alimentado! +${feedPoints} XP 🍖`);
+      setTimeout(() => { setExcited(false); setInteraction(null); setMessage(''); }, 2500);
     } catch (e) {
       setMessage(e.response?.data?.message || 'Erro ao alimentar');
       setTimeout(() => setMessage(''), 3000);
@@ -90,15 +92,17 @@ const PetPage = () => {
   };
 
   const handlePet = () => {
+    setInteraction('pet');
     setExcited(true);
     setMessage(`${pet.name} adorou! 💕`);
-    setTimeout(() => { setExcited(false); setMessage(''); }, 2000);
+    setTimeout(() => { setExcited(false); setInteraction(null); setMessage(''); }, 2000);
   };
 
   const handlePlay = () => {
+    setInteraction('play');
     setExcited(true);
     setMessage(`${pet.name} está a brincar! 🎮`);
-    setTimeout(() => { setExcited(false); setMessage(''); }, 2500);
+    setTimeout(() => { setExcited(false); setInteraction(null); setMessage(''); }, 2500);
   };
 
   const StatBar = ({ label, value, icon, color, warning }) => (
@@ -218,6 +222,7 @@ const PetPage = () => {
             evolutionStage={pet?.evolutionStage}
             size={180}
             excited={excited}
+            interaction={interaction}
           />
 
           <Typography variant="h5" fontWeight={800} sx={{ mt: 1 }}>
