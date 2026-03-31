@@ -13,3 +13,4 @@ root.render(
 
 // Register service worker for PWA support
 serviceWorkerRegistration.register();
+// BUILD_VERSION_v3_

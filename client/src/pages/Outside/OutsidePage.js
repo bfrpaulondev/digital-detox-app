@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import {
-  Box, Typography, Card, CardContent, Tabs, Tab,
+  Box, Typography, Card, CardContent,
   Chip, Button, Dialog, DialogTitle, DialogContent,
   DialogActions, Paper, LinearProgress
 } from '@mui/material';
@@ -305,26 +305,42 @@ const OutsidePage = () => {
     <Box sx={{ minHeight: '100vh', bgcolor: 'background.default', pb: 10 }}>
       <AppHeader title="Fora da Escola" showBack showProfile={false} />
 
-      <Box sx={{ bgcolor: 'background.paper', borderBottom: '1px solid', borderColor: 'divider', position: 'sticky', top: 56, zIndex: 10 }}>
-        <Tabs
-          value={tab}
-          onChange={(_, v) => setTab(v)}
-          variant="fullWidth"
-          sx={{ '& .MuiTab-root': { minHeight: 56 } }}
-        >
-          {user?.role === 'parent' ? (
-            <>
-              <Tab label="Definições" icon={<OutsideIcon />} iconPosition="start" />
-              <Tab label="Atividades" icon={<StarIcon />} iconPosition="start" />
-            </>
-          ) : (
-            <>
-              <Tab label="Atividades" icon={<CheckIcon />} iconPosition="start" />
-              <Tab label="Sugestões" icon={<TipIcon />} iconPosition="start" />
-              <Tab label="Tempo" icon={<TimeIcon />} iconPosition="start" />
-            </>
-          )}
-        </Tabs>
+      <Box sx={{
+        bgcolor: 'background.paper', borderBottom: '2px solid',
+        borderColor: 'divider', position: 'sticky', top: 56, zIndex: 10,
+        display: 'flex'
+      }}>
+        {(user?.role === 'parent'
+          ? [
+              { label: 'Definições', icon: <OutsideIcon sx={{ fontSize: 18 }} /> },
+              { label: 'Atividades', icon: <StarIcon sx={{ fontSize: 18 }} /> }
+            ]
+          : [
+              { label: 'Atividades', icon: <CheckIcon sx={{ fontSize: 18 }} /> },
+              { label: 'Sugestões', icon: <TipIcon sx={{ fontSize: 18 }} /> },
+              { label: 'Tempo', icon: <TimeIcon sx={{ fontSize: 18 }} /> }
+            ]
+        ).map((t, i) => (
+          <Box
+            key={i}
+            onClick={() => setTab(i)}
+            sx={{
+              flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center',
+              gap: 0.5, py: 1.5, px: 1, cursor: 'pointer', userSelect: 'none',
+              WebkitTapHighlightColor: 'transparent',
+              borderBottom: tab === i ? '3px solid' : '3px solid transparent',
+              borderColor: tab === i ? 'primary.main' : 'transparent',
+              color: tab === i ? 'primary.main' : 'text.secondary',
+              bgcolor: tab === i ? 'rgba(108, 99, 255, 0.06)' : 'transparent',
+              fontWeight: tab === i ? 700 : 400, fontSize: '0.8rem',
+              transition: 'all 0.2s ease',
+              '&:active': { bgcolor: 'rgba(108, 99, 255, 0.12)' }
+            }}
+          >
+            {t.icon}
+            <Typography variant="caption" sx={{ fontWeight: 'inherit', fontSize: '0.75rem' }}>{t.label}</Typography>
+          </Box>
+        ))}
       </Box>
 
       <Box sx={{ px: 2, pt: 2 }}>

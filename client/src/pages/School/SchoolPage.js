@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import {
-  Box, Typography, Card, CardContent, Tabs, Tab, List, ListItem,
+  Box, Typography, Card, CardContent, List, ListItem,
   ListItemText, Chip, Button, TextField, Dialog,
   DialogTitle, DialogContent, DialogActions, Avatar,
   IconButton, Fab, Paper, InputAdornment, MenuItem
@@ -29,6 +29,57 @@ const emptyStudent = {
   1: { icon: <CheckIcon sx={{ fontSize: 48, color: 'grey.300' }} />, title: 'Sem atividades concluídas', desc: 'Conclui atividades pendentes para ver aqui!' },
   2: { icon: <StarIcon sx={{ fontSize: 48, color: 'grey.300' }} />, title: 'Sem atividades validadas', desc: 'Quando o professor validar, aparecem aqui!' }
 };
+
+function CustomTabBar({ tabs, activeTab, onTabChange }) {
+  return (
+    <Box sx={{
+      bgcolor: 'background.paper',
+      borderBottom: '2px solid',
+      borderColor: 'divider',
+      position: 'sticky',
+      top: 56,
+      zIndex: 10,
+      display: 'flex'
+    }}>
+      {tabs.map((tab, index) => {
+        const isActive = activeTab === index;
+        return (
+          <Box
+            key={index}
+            onClick={() => onTabChange(index)}
+            sx={{
+              flex: 1,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 0.5,
+              py: 1.5,
+              px: 1,
+              cursor: 'pointer',
+              userSelect: 'none',
+              WebkitTapHighlightColor: 'transparent',
+              borderBottom: isActive ? '3px solid' : '3px solid transparent',
+              borderColor: isActive ? 'primary.main' : 'transparent',
+              color: isActive ? 'primary.main' : 'text.secondary',
+              bgcolor: isActive ? 'rgba(108, 99, 255, 0.06)' : 'transparent',
+              fontWeight: isActive ? 700 : 400,
+              fontSize: '0.8rem',
+              transition: 'all 0.2s ease',
+              '&:active': {
+                bgcolor: 'rgba(108, 99, 255, 0.12)',
+              }
+            }}
+          >
+            {tab.icon}
+            <Typography variant="caption" sx={{ fontWeight: 'inherit', fontSize: '0.75rem' }}>
+              {tab.label}
+            </Typography>
+          </Box>
+        );
+      })}
+    </Box>
+  );
+}
 
 const SchoolPage = () => {
   const { user } = useAuth();
@@ -75,13 +126,23 @@ const SchoolPage = () => {
 
   useEffect(() => {
     loadTabData(currentTab);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentTab]);
 
-  const handleTabChange = (event, newValue) => {
-    setCurrentTab(newValue);
-    setSearchQuery('');
-  };
+  const isTeacher = user?.role === 'teacher';
+  const emptyState = isTeacher ? emptyTeacher : emptyStudent;
+
+  const teacherTabs = [
+    { label: 'Pendentes', icon: <AssignmentIcon sx={{ fontSize: 18 }} /> },
+    { label: 'Concluídas', icon: <CheckIcon sx={{ fontSize: 18 }} /> },
+    { label: 'Alunos', icon: <PeopleIcon sx={{ fontSize: 18 }} /> }
+  ];
+
+  const studentTabs = [
+    { label: 'Pendentes', icon: <AssignmentIcon sx={{ fontSize: 18 }} /> },
+    { label: 'Concluídas', icon: <CheckIcon sx={{ fontSize: 18 }} /> },
+    { label: 'Validadas', icon: <StarIcon sx={{ fontSize: 18 }} /> }
+  ];
 
   const handleCreateActivity = async () => {
     try {
@@ -108,10 +169,6 @@ const SchoolPage = () => {
     } catch (e) { console.error(e); }
   };
 
-  const tabIndex = currentTab;
-  const isTeacher = user?.role === 'teacher';
-  const emptyState = isTeacher ? emptyTeacher : emptyStudent;
-
   const filteredActivities = (activities || []).filter(a =>
     a.title?.toLowerCase().includes(searchQuery.toLowerCase())
   );
@@ -124,43 +181,15 @@ const SchoolPage = () => {
     <Box sx={{ minHeight: '100vh', bgcolor: 'background.default', pb: 10 }}>
       <AppHeader title="Escola" showBack showProfile={false} />
 
-      <Tabs
-        value={currentTab}
-        onChange={handleTabChange}
-        variant="fullWidth"
-        textColor="primary"
-        indicatorColor="primary"
-        sx={{
-          bgcolor: 'background.paper',
-          borderBottom: '1px solid',
-          borderColor: 'divider',
-          position: 'sticky',
-          top: 56,
-          zIndex: 10,
-          '& .MuiTab-root': {
-            minHeight: 56,
-            minWidth: 'auto'
-          }
-        }}
-      >
-        {isTeacher ? (
-          <>
-            <Tab label="Pendentes" icon={<AssignmentIcon />} iconPosition="start" />
-            <Tab label="Concluídas" icon={<CheckIcon />} iconPosition="start" />
-            <Tab label="Alunos" icon={<PeopleIcon />} iconPosition="start" />
-          </>
-        ) : (
-          <>
-            <Tab label="Pendentes" icon={<AssignmentIcon />} iconPosition="start" />
-            <Tab label="Concluídas" icon={<CheckIcon />} iconPosition="start" />
-            <Tab label="Validadas" icon={<StarIcon />} iconPosition="start" />
-          </>
-        )}
-      </Tabs>
+      <CustomTabBar
+        tabs={isTeacher ? teacherTabs : studentTabs}
+        activeTab={currentTab}
+        onTabChange={(idx) => { setCurrentTab(idx); setSearchQuery(''); }}
+      />
 
       <Box sx={{ px: 2, pt: 2 }}>
         {/* Students Tab (Teacher only) */}
-        {isTeacher && tabIndex === 2 && (
+        {isTeacher && currentTab === 2 && (
           <Box>
             <TextField fullWidth size="small" placeholder="Pesquisar alunos..."
               value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} sx={{ mb: 2 }}
@@ -186,9 +215,9 @@ const SchoolPage = () => {
         )}
 
         {/* Activities (all tabs except teacher's Students tab) */}
-        {!(isTeacher && tabIndex === 2) && (
+        {!(isTeacher && currentTab === 2) && (
           <Box>
-            {isTeacher && tabIndex === 0 && (
+            {isTeacher && currentTab === 0 && (
               <TextField fullWidth size="small" placeholder="Pesquisar atividades..."
                 value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} sx={{ mb: 2 }}
                 InputProps={{ startAdornment: <InputAdornment position="start"><SearchIcon /></InputAdornment> }} />
@@ -198,9 +227,9 @@ const SchoolPage = () => {
               <Typography textAlign="center" sx={{ py: 4 }} color="text.secondary">A carregar...</Typography>
             ) : filteredActivities.length === 0 ? (
               <Paper sx={{ p: 4, textAlign: 'center' }}>
-                {emptyState[tabIndex]?.icon}
-                <Typography fontWeight={600} sx={{ mt: 1 }} color="text.secondary">{emptyState[tabIndex]?.title}</Typography>
-                <Typography variant="body2" color="text.secondary">{emptyState[tabIndex]?.desc}</Typography>
+                {emptyState[currentTab]?.icon}
+                <Typography fontWeight={600} sx={{ mt: 1 }} color="text.secondary">{emptyState[currentTab]?.title}</Typography>
+                <Typography variant="body2" color="text.secondary">{emptyState[currentTab]?.desc}</Typography>
               </Paper>
             ) : (
               filteredActivities.map(activity => (
@@ -226,7 +255,7 @@ const SchoolPage = () => {
                     )}
 
                     {/* Teacher: Validate completed activities (tab 1) */}
-                    {isTeacher && tabIndex === 1 && activity.completedBy?.length > 0 && (
+                    {isTeacher && currentTab === 1 && activity.completedBy?.length > 0 && (
                       <Box sx={{ mt: 1.5 }}>
                         {activity.completedBy.map((completion, idx) => {
                           const studentName = completion.user?.toString?.() || completion.user || 'Aluno';
@@ -261,7 +290,7 @@ const SchoolPage = () => {
         )}
       </Box>
 
-      {isTeacher && tabIndex === 0 && (
+      {isTeacher && currentTab === 0 && (
         <Fab color="primary" onClick={() => setDialogOpen(true)} sx={{ position: 'fixed', bottom: 86, right: 16 }}><AddIcon /></Fab>
       )}
 
@@ -286,4 +315,3 @@ const SchoolPage = () => {
 };
 
 export default SchoolPage;
-// deploy timestamp 1774964694
