@@ -13,6 +13,11 @@ const schoolSchema = new mongoose.Schema({
     uppercase: true,
     trim: true
   },
+  city: {
+    type: String,
+    trim: true,
+    required: [true, 'Cidade é obrigatória']
+  },
   address: {
     type: String,
     trim: true
@@ -81,11 +86,34 @@ const schoolSchema = new mongoose.Schema({
   isActive: {
     type: Boolean,
     default: true
+  },
+  // Pending changes awaiting teacher votes
+  pendingChanges: {
+    type: {
+      type: String,
+      enum: ['edit', 'delete']
+    },
+    proposedData: mongoose.Schema.Types.Mixed,
+    votes: [{
+      teacher: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
+      },
+      votedAt: {
+        type: Date,
+        default: Date.now
+      }
+    }],
+    createdAt: {
+      type: Date,
+      default: Date.now
+    }
   }
 }, {
   timestamps: true
 });
 
 schoolSchema.index({ code: 1 });
+schoolSchema.index({ city: 1 });
 
 module.exports = mongoose.model('School', schoolSchema);

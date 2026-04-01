@@ -58,8 +58,14 @@ export const userAPI = {
 
 // School API
 export const schoolAPI = {
-  getAll: () => api.get('/schools'),
+  getAll: (params) => api.get('/schools', { params }),
+  getCities: () => api.get('/schools/cities'),
   getById: (id) => api.get(`/schools/${id}`),
+  create: (data) => api.post('/schools', data),
+  update: (id, data) => api.put(`/schools/${id}`, data),
+  voteDelete: (id) => api.post(`/schools/${id}/vote-delete`),
+  cancelPending: (id) => api.post(`/schools/${id}/cancel-pending`),
+  getPendingChanges: (id) => api.get(`/schools/${id}/pending-changes`),
   getSchedule: (id, params) => api.get(`/schools/${id}/schedule`, { params }),
   getStudents: (id, params) => api.get(`/schools/${id}/students`, { params })
 };
@@ -108,7 +114,9 @@ export const parentAPI = {
 
 // Calendar API
 export const calendarAPI = {
-  getEvents: (params) => api.get('/calendar', { params })
+  getEvents: (params) => api.get('/calendar', { params }),
+  createMission: (data) => api.post('/calendar/mission', data),
+  completeMission: (id, data) => api.put(`/calendar/mission/${id}/complete`, data)
 };
 
 // AI API
