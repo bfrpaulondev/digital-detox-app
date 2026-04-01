@@ -18,6 +18,7 @@ const OutsidePage = lazy(() => import('./pages/Outside/OutsidePage'));
 const ProfilePage = lazy(() => import('./pages/Profile/ProfilePage'));
 const NotificationsPage = lazy(() => import('./pages/Dashboard/NotificationsPage'));
 const RankingPage = lazy(() => import('./pages/Dashboard/RankingPage'));
+const PreviewPetsPage = lazy(() => import('./pages/PreviewPetsPage'));
 
 const ProtectedRoute = ({ children, roles }) => {
   const { isAuthenticated, user, loading } = useAuth();
@@ -58,8 +59,11 @@ const AppContent = () => {
           <Route path="/notifications" element={<ProtectedRoute><NotificationsPage /></ProtectedRoute>} />
           <Route path="/ranking" element={<ProtectedRoute roles={['student', 'teacher']}><RankingPage /></ProtectedRoute>} />
 
+          {/* Preview (temporary) */}
+          <Route path="/preview-pets" element={<PreviewPetsPage />} />
+
           {/* Default */}
-          <Route path="*" element={<Navigate to={isAuthenticated ? "/dashboard" : "/login"} />} />
+          <Route path="*" element={<Navigate to={isAuthenticated ? "/dashboard" : "/login"} />} /> />
         </Routes>
       </Suspense>
       {isAuthenticated && <BottomNav />}
