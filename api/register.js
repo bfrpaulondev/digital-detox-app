@@ -135,6 +135,8 @@ module.exports = async function handler(req, res) {
       if (child) {
         child.linkedParent = user._id;
         await child.save();
+        user.linkedChildren = [child._id];
+        await user.save();
       }
     }
 
