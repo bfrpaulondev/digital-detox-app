@@ -117,8 +117,8 @@ export const moodAnimations = {
 };
 
 export const speciesColors = {
-  gato: { primary: '#FFB347', secondary: '#FF8C00', accent: '#FFF0D9', belly: '#FFF8F0', nose: '#FF6B8A', inner: '#FFB6C1', iris: '#FF6D00', dark: '#E67600' },
-  cao: { primary: '#C49A6C', secondary: '#A0724A', accent: '#F0E0D0', belly: '#FFF5EC', nose: '#5D4037', inner: '#FFCCBC', iris: '#7B4B2A', dark: '#8D6E63' },
+  gato: { primary: '#C49A6C', secondary: '#A0724A', accent: '#F0E0D0', belly: '#FFF5EC', nose: '#5D4037', inner: '#FFCCBC', iris: '#7B4B2A', dark: '#8D6E63' },
+  cao: { primary: '#FFB347', secondary: '#FF8C00', accent: '#FFF0D9', belly: '#FFF8F0', nose: '#FF6B8A', inner: '#FFB6C1', iris: '#FF6D00', dark: '#E67600' },
   passaro: { primary: '#7EC8E3', secondary: '#42A5F5', accent: '#D4EEFF', belly: '#F0F8FF', nose: '#FFA726', inner: '#FFE082', iris: '#1565C0', dark: '#1976D2' },
   tartaruga: { primary: '#81C784', secondary: '#4CAF50', accent: '#C8E6C9', belly: '#F1F8E9', nose: '#2E7D32', inner: '#A5D6A7', iris: '#1B5E20', dark: '#388E3C' }
 };

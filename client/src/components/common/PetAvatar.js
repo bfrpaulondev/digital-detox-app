@@ -6,8 +6,8 @@ const petEmojis = {
 };
 
 export const speciesColors = {
-  gato: { primary: '#FFB74D', secondary: '#FF9800', accent: '#FFF3E0', nose: '#F48FB1', iris: '#FF8F00' },
-  cao: { primary: '#A1887F', secondary: '#8D6E63', accent: '#EFEBE9', nose: '#5D4037', iris: '#795548' },
+  gato: { primary: '#A1887F', secondary: '#8D6E63', accent: '#EFEBE9', nose: '#5D4037', iris: '#795548' },
+  cao: { primary: '#FFB74D', secondary: '#FF9800', accent: '#FFF3E0', nose: '#F48FB1', iris: '#FF8F00' },
   passaro: { primary: '#64B5F6', secondary: '#42A5F5', accent: '#E3F2FD', nose: '#FFB74D', iris: '#1E88E5' },
   tartaruga: { primary: '#81C784', secondary: '#66BB6A', accent: '#E8F5E9', nose: '#388E3C', iris: '#2E7D32' }
 };
