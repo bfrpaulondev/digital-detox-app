@@ -5,16 +5,33 @@ const petEmojis = {
   gato: '🐱', cao: '🐶', passaro: '🐦', tartaruga: '🐢'
 };
 
+export const speciesColors = {
+  gato: { primary: '#FFB74D', secondary: '#FF9800', accent: '#FFF3E0', nose: '#F48FB1', iris: '#FF8F00' },
+  cao: { primary: '#A1887F', secondary: '#8D6E63', accent: '#EFEBE9', nose: '#5D4037', iris: '#795548' },
+  passaro: { primary: '#64B5F6', secondary: '#42A5F5', accent: '#E3F2FD', nose: '#FFB74D', iris: '#1E88E5' },
+  tartaruga: { primary: '#81C784', secondary: '#66BB6A', accent: '#E8F5E9', nose: '#388E3C', iris: '#2E7D32' }
+};
+
 const moodColors = {
-  feliz: '#4CAF50', triste: '#9E9E9E', sonolento: '#9C27B0',
-  energico: '#FF9800', com_fome: '#F44336', brincalhao: '#2196F3'
+  feliz: '#A5D6A7',
+  triste: '#B0BEC5',
+  sonolento: '#CE93D8',
+  energico: '#FFCC80',
+  com_fome: '#EF9A9A',
+  brincalhao: '#90CAF9',
+  doente: '#C5E1A5'
 };
 
 const evolutionStages = ['🥚', '🐣', '🐾', '👑'];
 
 const PetAvatar = ({ species, mood, evolutionStage, size = 60 }) => {
   const emoji = petEmojis[species] || '🐾';
-  const bgColor = moodColors[mood] || '#6C63FF';
+  const sc = speciesColors[species] || speciesColors.gato;
+  const moodColor = moodColors[mood] || '#B39DDB';
+  const bgColor = sc.accent;
+  const borderColor = mood === 'feliz' || mood === 'brincalhao'
+    ? sc.primary
+    : moodColor;
   const stage = evolutionStages[(evolutionStage || 1) - 1] || '🥚';
 
   return (
@@ -22,9 +39,9 @@ const PetAvatar = ({ species, mood, evolutionStage, size = 60 }) => {
       <Avatar
         sx={{
           width: size, height: size,
-          bgcolor: `${bgColor}15`,
+          bgcolor: `${bgColor}`,
           fontSize: size * 0.5,
-          border: `3px solid ${bgColor}`,
+          border: `3px solid ${borderColor}`,
           transition: 'all 0.3s ease',
           animation: 'petAvatarBounce 2s ease-in-out infinite'
         }}
