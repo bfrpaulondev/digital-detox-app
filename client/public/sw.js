@@ -1,98 +1,60 @@
-// Digital Detox PWA Service Worker v3
-// Strategy: Network-first for everything, cache only HTML and static assets
-const CACHE_NAME = 'digital-detox-v3';
+// Digital Detox PWA Service Worker v4
+// Strategy: Network-first for everything, minimal cache
+const CACHE_NAME = 'digital-detox-v4';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
-  '/manifest.json',
-  '/icons/icon-192x192.png',
-  '/icons/icon-512x512.png'
+  '/manifest.json'
 ];
 
-// File patterns that should NEVER be cached (always fetched from network)
-const NO_CACHE_EXTENSIONS = ['.js', '.css', '.json', '.woff', '.woff2', '.ttf', '.svg'];
-
+// Nothing gets cached except bare minimum HTML
 function shouldCache(url) {
-  // Never cache API calls
   if (url.includes('/api/')) return false;
-  // Never cache JS/CSS/font bundles
   const pathname = new URL(url).pathname;
-  for (const ext of NO_CACHE_EXTENSIONS) {
-    if (pathname.endsWith(ext)) return false;
-  }
-  // Only cache static assets listed above
-  return true;
+  // Only cache index.html root
+  return pathname === '/' || pathname === '/index.html';
 }
 
-// Install event - cache minimal static assets only
+// Install - minimal
 self.addEventListener('install', (event) => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(STATIC_ASSETS);
-    })
-  );
   self.skipWaiting();
 });
 
-// Activate event - clean ALL old caches (forces fresh start)
+// Activate - delete ALL old caches
 self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.keys().then((cacheNames) => {
-      return Promise.all(
-        cacheNames.map((name) => {
-          // Delete ALL caches, including current one, to force fresh start
-          return caches.delete(name);
-        })
-      );
-    })
+    caches.keys().then((names) => Promise.all(names.map(n => caches.delete(n))))
   );
   self.clients.claim();
-  // Notify all clients to refresh
+  // Force all clients to reload
   self.clients.matchAll().then((clients) => {
-    clients.forEach((client) => {
-      client.postMessage({ type: 'SW_UPDATED', cacheName: CACHE_NAME });
-    });
+    clients.forEach((client) => client.postMessage({ type: 'SW_UPDATED', v: 4 }));
   });
 });
 
-// Fetch event - network first, cache only allowed resources
+// Fetch - network always
 self.addEventListener('fetch', (event) => {
-  // Skip non-GET requests
   if (event.request.method !== 'GET') return;
-
-  // Skip API calls entirely
   if (event.request.url.includes('/api/')) return;
 
-  // For JS/CSS bundles, always go to network (never cache)
-  if (!shouldCache(event.request.url)) {
-    event.respondWith(
-      fetch(event.request).catch(() => {
-        return new Response('Offline - Resource not available', { status: 503 });
-      })
-    );
+  // JS/CSS never cached
+  const pathname = new URL(event.request.url).pathname;
+  const noCache = ['.js', '.css', '.json', '.woff', '.woff2', '.ttf', '.svg'].some(ext => pathname.endsWith(ext));
+
+  if (noCache) {
+    event.respondWith(fetch(event.request).catch(() => new Response('Offline', { status: 503 })));
     return;
   }
 
-  // For allowed resources: network first, cache fallback
   event.respondWith(
     fetch(event.request)
-      .then((response) => {
-        if (response.status === 200) {
-          const responseClone = response.clone();
-          caches.open(CACHE_NAME).then((cache) => {
-            cache.put(event.request, responseClone);
-          });
+      .then((res) => {
+        if (res.status === 200 && shouldCache(event.request.url)) {
+          const clone = res.clone();
+          caches.open(CACHE_NAME).then(c => c.put(event.request, clone));
         }
-        return response;
+        return res;
       })
-      .catch(() => {
-        return caches.match(event.request).then((response) => {
-          if (response) return response;
-          if (event.request.mode === 'navigate') {
-            return caches.match('/index.html');
-          }
-          return new Response('Offline', { status: 503 });
-        });
-      })
+      .catch(() => caches.match(event.request).then(r => r || new Response('Offline', { status: 503 })))
   );
 });

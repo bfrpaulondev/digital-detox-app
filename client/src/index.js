@@ -37,4 +37,4 @@ if ('serviceWorker' in navigator) {
   });
 }
 
-// BUILD_VERSION_v4_
+// BUILD_VERSION_v5_
