@@ -848,10 +848,10 @@ const YoungPetSVG = ({ species, mood, stage, size, interaction }) => {
       {/* Whiskers for cat */}
       {species === 'gato' && (
         <g>
-          <line x1={70 - HR * 0.95} y1={headY + 3} x2={70 - HR * 0.42} y1={headY + 6} stroke="#ccc" strokeWidth="0.7" />
-          <line x1={70 - HR} y1={headY + 8} x2={70 - HR * 0.4} y1={headY + 9} stroke="#ccc" strokeWidth="0.7" />
-          <line x1={70 + HR * 0.42} y1={headY + 6} x2={70 + HR * 0.95} y1={headY + 3} stroke="#ccc" strokeWidth="0.7" />
-          <line x1={70 + HR * 0.4} y1={headY + 9} x2={70 + HR} y1={headY + 8} stroke="#ccc" strokeWidth="0.7" />
+          <line x1={70 - HR * 0.95} y1={headY + 3} x2={70 - HR * 0.42} y2={headY + 6} stroke="#ccc" strokeWidth="0.7" />
+          <line x1={70 - HR} y1={headY + 8} x2={70 - HR * 0.4} y2={headY + 9} stroke="#ccc" strokeWidth="0.7" />
+          <line x1={70 + HR * 0.42} y1={headY + 6} x2={70 + HR * 0.95} y2={headY + 3} stroke="#ccc" strokeWidth="0.7" />
+          <line x1={70 + HR * 0.4} y1={headY + 9} x2={70 + HR} y2={headY + 8} stroke="#ccc" strokeWidth="0.7" />
         </g>
       )}
 
