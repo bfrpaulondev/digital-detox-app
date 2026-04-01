@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Box, Typography, keyframes } from '@mui/material';
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -9,12 +9,7 @@ const floatAnim = keyframes`
   0%, 100% { transform: translateY(0px); }
   50% { transform: translateY(-8px); }
 `;
-const bounceAnim = keyframes`
-  0%, 100% { transform: translateY(0) scale(1); }
-  30% { transform: translateY(-20px) scale(1.05); }
-  50% { transform: translateY(0) scale(0.95); }
-  70% { transform: translateY(-10px) scale(1.02); }
-`;
+/* bounceAnim reserved for future use */
 const wobbleAnim = keyframes`
   0%, 100% { transform: rotate(-4deg) translateY(0); }
   25% { transform: rotate(0deg) translateY(-3px); }
@@ -85,13 +80,7 @@ const blushPop = keyframes`
   50% { opacity: 0.7; transform: scale(1.2); }
   100% { opacity: 0.5; transform: scale(1); }
 `;
-const happyBounce = keyframes`
-  0%, 100% { transform: translateY(0) scale(1); }
-  20% { transform: translateY(-16px) scale(1.08); }
-  40% { transform: translateY(0) scale(0.96); }
-  60% { transform: translateY(-8px) scale(1.04); }
-  80% { transform: translateY(0) scale(0.99); }
-`;
+/* happyBounce reserved for future use */
 const goldenGlow = keyframes`
   0%, 100% { opacity: 0.12; }
   50% { opacity: 0.3; }
@@ -113,12 +102,7 @@ const squishAnim = keyframes`
 // CONFIG
 // ═══════════════════════════════════════════════════════════════════════════════
 
-const stageDescriptions = {
-  1: 'Sou um ovinho! Alimenta-me para eu eclodir!',
-  2: 'Olá! Acabei de nascer! Brinca comigo!',
-  3: 'Estou a crescer! Quero ser forte!',
-  4: 'Sou adulto agora! Obrigado por cuidares de mim!'
-};
+/* stageDescriptions reserved for future use */
 
 export const stageNames = { 1: 'Ovo', 2: 'Bebé', 3: 'Jovem', 4: 'Adulto' };
 
@@ -533,10 +517,10 @@ const BabyPetSVG = ({ species, mood, size, interaction }) => {
     if (species !== 'gato') return null;
     return (
       <g>
-        <line x1={60 - 38} y1={H + 2} x2={60 - 16} y1={H + 5} stroke="#ccc" strokeWidth="0.7" />
-        <line x1={60 - 40} y1={H + 7} x2={60 - 16} y1={H + 8} stroke="#ccc" strokeWidth="0.7" />
-        <line x1={60 + 16} y1={H + 5} x2={60 + 38} y1={H + 2} stroke="#ccc" strokeWidth="0.7" />
-        <line x1={60 + 16} y1={H + 8} x2={60 + 40} y1={H + 7} stroke="#ccc" strokeWidth="0.7" />
+        <line x1={60 - 38} y1={H + 2} x2={60 - 16} y2={H + 5} stroke="#ccc" strokeWidth="0.7" />
+        <line x1={60 - 40} y1={H + 7} x2={60 - 16} y2={H + 8} stroke="#ccc" strokeWidth="0.7" />
+        <line x1={60 + 16} y1={H + 5} x2={60 + 38} y2={H + 2} stroke="#ccc" strokeWidth="0.7" />
+        <line x1={60 + 16} y1={H + 8} x2={60 + 40} y2={H + 7} stroke="#ccc" strokeWidth="0.7" />
       </g>
     );
   };
