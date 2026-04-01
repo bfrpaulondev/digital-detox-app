@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import {
-  Box, Typography, Card, CardContent, List, ListItem,
+import { Box, Typography, Card, CardContent, List, ListItem,
   ListItemText, Chip, Button, TextField, Dialog,
   DialogTitle, DialogContent, DialogActions, Avatar,
   IconButton, Fab, Paper, InputAdornment, MenuItem,
+  CircularProgress } from '@mui/material';
+import {
   CalendarMonth as CalendarIcon,
   Assignment as AssignmentIcon,
   CheckCircle as CheckIcon,
@@ -20,8 +21,7 @@ import {
   ChevronLeft as ChevronLeftIcon,
   ChevronRight as ChevronRightIcon,
   Event as EventIcon,
-  Cancel as CancelIcon,
-  CircularProgress
+  Cancel as CancelIcon
 } from '@mui/icons-material';
 import { useSnackbar } from 'notistack';
 import { useAuth } from '../../context/AuthContext';
@@ -466,7 +466,7 @@ const SchoolsManagement = ({ enqueueSnackbar }) => {
                               setEditSchool({
                                 name: pending.proposedData?.name || school.name,
                                 city: pending.proposedData?.city || school.city,
-                                address: pending.proposedData?.address ?? school.address || ''
+                                address: (pending.proposedData?.address ?? school.address) || ''
                               });
                               setEditDialogOpen(true);
                             }} startIcon={<VoteIcon />}>Votar</Button>

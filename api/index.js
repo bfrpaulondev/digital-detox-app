@@ -173,13 +173,35 @@ module.exports = async function handler(req, res) {
 
     // GET /api/schools
     if (path === '/api/schools' && method === 'GET') {
+      const { city } = req.query || {};
+      const query = { isActive: true };
+      if (city) query.city = new RegExp(city, 'i');
       const schools = await mongoDb.collection('schools')
-        .find({ isActive: true }).sort({ name: 1 }).limit(100).toArray();
+        .find(query).sort({ name: 1 }).limit(100).toArray();
       return res.json({ success: true, data: schools });
     }
 
-    // GET /api/schools/:id
-    if (path.match(/^\/api\/schools\/[\w-]+$/) && method === 'GET' && !path.includes('/schedule') && !path.includes('/students')) {
+    // GET /api/schools/cities (MUST be before /:id)
+    if (path === '/api/schools/cities' && method === 'GET') {
+      const cities = await mongoDb.collection('schools').distinct('city', { isActive: true });
+      return res.json({ success: true, data: cities.sort() });
+    }
+
+    // POST /api/schools (teacher only - create school)
+    if (path === '/api/schools' && method === 'POST') {
+      if (!currentUser) return authError(res);
+      if (currentUser.role !== 'teacher') return res.status(403).json({ success: false, message: 'Apenas professores podem criar escolas.' });
+      const { name, code, city, address, levels } = body;
+      if (!name || !code || !city) return res.status(400).json({ success: false, message: 'Nome, código e cidade são obrigatórios.' });
+      const existing = await mongoDb.collection('schools').findOne({ code: code.toUpperCase() });
+      if (existing) return res.status(400).json({ success: false, message: 'Já existe uma escola com esse código.' });
+      const schoolData = { name, code: code.toUpperCase(), city, address: address || '', levels: levels || [], isActive: true, createdAt: new Date(), updatedAt: new Date() };
+      const result = await mongoDb.collection('schools').insertOne(schoolData);
+      return res.status(201).json({ success: true, data: { _id: result.insertedId, ...schoolData }, message: 'Escola criada com sucesso!' });
+    }
+
+    // GET /api/schools/:id (only non-sub-routes like schedule/students/pending-changes)
+    if (path.match(/^\/api\/schools\/[\w-]+$/) && method === 'GET' && !path.includes('/schedule') && !path.includes('/students') && !path.includes('/pending-changes')) {
       const id = path.split('/').pop();
       try {
         const school = await mongoDb.collection('schools').findOne({ _id: new mongoose.Types.ObjectId(id) });
@@ -1651,6 +1673,156 @@ module.exports = async function handler(req, res) {
         message: `Seed completed. ${results.filter(r => r.status === 'created').length} created, ${results.filter(r => r.status === 'skipped').length} skipped.`,
         data: results,
       });
+    }
+
+    // ============================================================
+    // SCHOOL MANAGEMENT ROUTES (teacher)
+    // ============================================================
+
+    // GET /api/schools/:id/pending-changes
+    if (path.match(/\/pending-changes$/) && method === 'GET') {
+      if (!currentUser) return authError(res);
+      if (currentUser.role !== 'teacher') return res.status(403).json({ success: false, message: 'Apenas professores.' });
+      const schoolId = path.match(/\/api\/schools\/([\w-]+)\//)?.[1];
+      const school = await mongoDb.collection('schools').findOne({ _id: new mongoose.Types.ObjectId(schoolId) });
+      if (!school) return res.status(404).json({ success: false, message: 'Escola não encontrada.' });
+      if (!school.pendingChanges || !school.pendingChanges.type) return res.json({ success: true, data: null });
+      const pending = school.pendingChanges;
+      const votesWithNames = [];
+      for (const v of (pending.votes || [])) {
+        const t = await mongoDb.collection('users').findOne({ _id: v.teacher }, { projection: { fullName: 1 } });
+        votesWithNames.push({ teacherId: v.teacher, teacherName: t?.fullName || 'Professor', votedAt: v.votedAt });
+      }
+      return res.json({ success: true, data: { ...pending, votes: votesWithNames, neededVotes: 3, currentVotes: votesWithNames.length } });
+    }
+
+    // PUT /api/schools/:id (edit with 3-vote system)
+    if (path.match(/^\/api\/schools\/[\w-]+$/) && method === 'PUT' && !path.includes('/vote') && !path.includes('/cancel')) {
+      if (!currentUser) return authError(res);
+      if (currentUser.role !== 'teacher') return res.status(403).json({ success: false, message: 'Apenas professores.' });
+      const schoolId = path.split('/')[3];
+      const school = await mongoDb.collection('schools').findOne({ _id: new mongoose.Types.ObjectId(schoolId) });
+      if (!school) return res.status(404).json({ success: false, message: 'Escola não encontrada.' });
+      const { name, city: newCity, address } = body;
+      const proposedData = {};
+      if (name) proposedData.name = name;
+      if (newCity) proposedData.city = newCity;
+      if (address !== undefined) proposedData.address = address;
+
+      if (school.pendingChanges && school.pendingChanges.type === 'edit') {
+        const alreadyVoted = (school.pendingChanges.votes || []).some(v => v.teacher?.toString() === currentUser._id.toString());
+        if (alreadyVoted) return res.status(400).json({ success: false, message: 'Já votaste.' });
+        if (JSON.stringify(proposedData) !== JSON.stringify(school.pendingChanges.proposedData))
+          return res.status(400).json({ success: false, message: 'Já existe uma proposta diferente.' });
+        school.pendingChanges.votes.push({ teacher: currentUser._id, votedAt: new Date() });
+        if (school.pendingChanges.votes.length >= 3) {
+          const updateFields = {}; if (proposedData.name) updateFields.name = proposedData.name;
+          if (proposedData.city) updateFields.city = proposedData.city; if (proposedData.address !== undefined) updateFields.address = proposedData.address;
+          await mongoDb.collection('schools').updateOne({ _id: new mongoose.Types.ObjectId(schoolId) }, { $set: { ...updateFields, pendingChanges: null, updatedAt: new Date() } });
+          return res.json({ success: true, message: 'Alteração aprovada com 3 votos!' });
+        }
+        await mongoDb.collection('schools').updateOne({ _id: new mongoose.Types.ObjectId(schoolId) }, { $set: { pendingChanges: school.pendingChanges, updatedAt: new Date() } });
+        return res.json({ success: true, message: `Voto registado! Faltam ${3 - school.pendingChanges.votes.length} voto(s).` });
+      }
+      school.pendingChanges = { type: 'edit', proposedData, votes: [{ teacher: currentUser._id, votedAt: new Date() }], createdAt: new Date() };
+      await mongoDb.collection('schools').updateOne({ _id: new mongoose.Types.ObjectId(schoolId) }, { $set: { pendingChanges: school.pendingChanges, updatedAt: new Date() } });
+      // Notify other teachers
+      const teachers = await mongoDb.collection('users').find({ school: new mongoose.Types.ObjectId(schoolId), role: 'teacher', isActive: true }).toArray();
+      const notifs = teachers.filter(t => t._id.toString() !== currentUser._id.toString()).map(t => ({
+        recipient: t._id, sender: currentUser._id, type: 'school_alert',
+        title: 'Proposta de Alteração', message: `${currentUser.fullName} propôs alterações na escola "${school.name}".`, isRead: false, createdAt: new Date()
+      }));
+      if (notifs.length > 0) await mongoDb.collection('notifications').insertMany(notifs);
+      return res.json({ success: true, message: 'Proposta criada! Precisa de mais 2 votos.' });
+    }
+
+    // POST /api/schools/:id/vote-delete
+    if (path.match(/\/vote-delete$/) && method === 'POST') {
+      if (!currentUser) return authError(res);
+      if (currentUser.role !== 'teacher') return res.status(403).json({ success: false, message: 'Apenas professores.' });
+      const schoolId = path.match(/\/api\/schools\/([\w-]+)\//)?.[1];
+      const school = await mongoDb.collection('schools').findOne({ _id: new mongoose.Types.ObjectId(schoolId) });
+      if (!school) return res.status(404).json({ success: false, message: 'Escola não encontrada.' });
+      if (school.pendingChanges && school.pendingChanges.type === 'edit')
+        return res.status(400).json({ success: false, message: 'Resolve a alteração pendente primeiro.' });
+      if (!school.pendingChanges || school.pendingChanges.type !== 'delete') {
+        school.pendingChanges = { type: 'delete', proposedData: {}, votes: [{ teacher: currentUser._id, votedAt: new Date() }], createdAt: new Date() };
+        await mongoDb.collection('schools').updateOne({ _id: new mongoose.Types.ObjectId(schoolId) }, { $set: { pendingChanges: school.pendingChanges, updatedAt: new Date() } });
+        const teachers = await mongoDb.collection('users').find({ school: new mongoose.Types.ObjectId(schoolId), role: 'teacher', isActive: true }).toArray();
+        const notifs = teachers.filter(t => t._id.toString() !== currentUser._id.toString()).map(t => ({
+          recipient: t._id, sender: currentUser._id, type: 'school_alert',
+          title: 'Proposta de Eliminação', message: `${currentUser.fullName} propôs eliminar "${school.name}".`, isRead: false, createdAt: new Date()
+        }));
+        if (notifs.length > 0) await mongoDb.collection('notifications').insertMany(notifs);
+        return res.json({ success: true, message: 'Proposta de eliminação criada! Precisa de 2 mais votos.' });
+      }
+      const alreadyVoted = (school.pendingChanges.votes || []).some(v => v.teacher?.toString() === currentUser._id.toString());
+      if (alreadyVoted) return res.status(400).json({ success: false, message: 'Já votaste.' });
+      school.pendingChanges.votes.push({ teacher: currentUser._id, votedAt: new Date() });
+      if (school.pendingChanges.votes.length >= 3) {
+        await mongoDb.collection('schools').updateOne({ _id: new mongoose.Types.ObjectId(schoolId) }, { $set: { isActive: false, pendingChanges: null, updatedAt: new Date() } });
+        return res.json({ success: true, message: 'Escola eliminada com 3 votos!' });
+      }
+      await mongoDb.collection('schools').updateOne({ _id: new mongoose.Types.ObjectId(schoolId) }, { $set: { pendingChanges: school.pendingChanges, updatedAt: new Date() } });
+      return res.json({ success: true, message: `Voto registado! Faltam ${3 - school.pendingChanges.votes.length} voto(s).` });
+    }
+
+    // POST /api/schools/:id/cancel-pending
+    if (path.match(/\/cancel-pending$/) && method === 'POST') {
+      if (!currentUser) return authError(res);
+      const schoolId = path.match(/\/api\/schools\/([\w-]+)\//)?.[1];
+      await mongoDb.collection('schools').updateOne({ _id: new mongoose.Types.ObjectId(schoolId) }, { $set: { pendingChanges: null, updatedAt: new Date() } });
+      return res.json({ success: true, message: 'Proposta cancelada.' });
+    }
+
+    // ============================================================
+    // CALENDAR ROUTES
+    // ============================================================
+
+    // GET /api/calendar
+    if (path === '/api/calendar' && method === 'GET') {
+      if (!currentUser) return authError(res);
+      const { month, year } = req.query || {};
+      const events = [];
+      if (currentUser.role === 'teacher') {
+        const mQuery = { assignedBy: currentUser._id, scheduledDate: { $exists: true }, isActive: true };
+        if (month && year) {
+          const start = new Date(Number(year), Number(month) - 1, 1);
+          const end = new Date(Number(year), Number(month), 0, 23, 59, 59);
+          mQuery.scheduledDate = { $gte: start, $lte: end };
+        }
+        const acts = await mongoDb.collection('activities').find(mQuery).sort({ scheduledDate: -1 }).limit(50).toArray();
+        for (const a of acts) {
+          const cc = (a.completedBy || []).length || 0;
+          const ta = (a.assignedTo || []).length || 0;
+          events.push({ type: a.isMission ? 'mission' : 'activity', id: a._id, title: a.title, description: a.description, date: a.scheduledDate, scheduledTime: a.scheduledTime, classGroup: a.classGroup, pointsValue: a.pointsValue, isMission: a.isMission, completionCount: cc, totalAssigned: ta });
+        }
+      } else if (currentUser.role === 'student') {
+        const acts = await mongoDb.collection('activities').find({ assignedTo: currentUser._id, scheduledDate: { $exists: true }, isActive: true }).sort({ scheduledDate: -1 }).limit(50).toArray();
+        for (const a of acts) {
+          const done = (a.completedBy || []).some(c => (c.user?.toString?.() || c.user) === currentUser._id.toString());
+          events.push({ type: a.isMission ? 'mission' : 'activity', id: a._id, title: a.title, description: a.description, date: a.scheduledDate, pointsValue: a.pointsValue, isMission: a.isMission, isCompleted: done, requiresPhoto: a.requiresPhoto });
+        }
+      }
+      return res.json({ success: true, data: events });
+    }
+
+    // POST /api/calendar/mission (teacher creates daily mission)
+    if (path === '/api/calendar/mission' && method === 'POST') {
+      if (!currentUser) return authError(res);
+      if (currentUser.role !== 'teacher') return res.status(403).json({ success: false, message: 'Apenas professores.' });
+      if (!currentUser.school) return res.status(400).json({ success: false, message: 'Professor sem escola associada.' });
+      const { title, description, category, classGroup, scheduledDate, scheduledTime, pointsValue, requiresPhoto } = body;
+      if (!title || !scheduledDate) return res.status(400).json({ success: false, message: 'Título e data são obrigatórios.' });
+      const sQuery = { school: currentUser.school, role: 'student', isActive: true };
+      if (classGroup) sQuery.grade = classGroup;
+      const students = await mongoDb.collection('users').find(sQuery).project({ _id: 1 }).toArray();
+      if (students.length === 0) return res.status(400).json({ success: false, message: 'Nenhum aluno encontrado.' });
+      const missionData = { title, description: description || '', category: category || 'escola', section: 'escola', school: currentUser.school, classGroup: classGroup || '', assignedBy: currentUser._id, scheduledDate: new Date(scheduledDate), scheduledTime: scheduledTime || null, pointsValue: pointsValue || 15, isMission: true, missionType: 'diaria', requiresPhoto: requiresPhoto !== false, assignedTo: students.map(s => s._id), status: 'pendente', isActive: true, createdAt: new Date(), updatedAt: new Date() };
+      const result = await mongoDb.collection('activities').insertOne(missionData);
+      const notifs = students.map(s => ({ recipient: s._id, sender: currentUser._id, type: 'school_alert', title: 'Nova Missão Diária! 🎯', message: `${title} — ${pointsValue || 15} pontos. Data: ${new Date(scheduledDate).toLocaleDateString('pt-PT')}.`, isRead: false, createdAt: new Date() }));
+      await mongoDb.collection('notifications').insertMany(notifs);
+      return res.status(201).json({ success: true, data: { _id: result.insertedId, ...missionData }, message: `Missão criada para ${students.length} aluno(s)!` });
     }
 
     // ============================================================
