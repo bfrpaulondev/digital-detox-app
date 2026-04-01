@@ -363,6 +363,10 @@ module.exports = async function handler(req, res) {
                 level: child.level || 1,
                 currentStreak: child.currentStreak || 0,
                 completedActivities: completed,
+                maxScreenTimeHours: child.maxScreenTimeHours || 4,
+                sleepTime: child.sleepTime || '22:00',
+                mealTimes: child.mealTimes || [],
+                familyTimeHours: child.familyTimeHours || 2,
                 pet: childPet ? {
                   name: childPet.name, species: childPet.species,
                   mood: childPet.mood, level: childPet.level
@@ -448,7 +452,7 @@ module.exports = async function handler(req, res) {
           typeof c === 'object' ? c.toString() : c
         );
         if (childIds.length > 0) {
-          query.assignedTo = { $in: childIds };
+          query.assignedTo = { $in: childIds.map(id => new mongoose.Types.ObjectId(id)) };
         } else {
           query.assignedTo = { $in: ['__none__'] }; // Return empty
         }
@@ -861,6 +865,213 @@ module.exports = async function handler(req, res) {
     }
 
     // ============================================================
+    // PARENT CHILD SETTINGS ROUTES
+    // ============================================================
+
+    // PUT /api/parent/child-settings/:childId
+    if (path.match(/^\/api\/parent\/child-settings\/[\w-]+$/) && method === 'PUT') {
+      if (!currentUser) return authError(res);
+      if (currentUser.role !== 'parent') {
+        return res.status(403).json({ success: false, message: 'Apenas pais podem alterar definições' });
+      }
+      const childId = path.split('/').pop();
+
+      // Verify child is linked
+      const linkedChildIds = (currentUser.linkedChildren || []).map(c =>
+        typeof c === 'object' ? c.toString() : c
+      );
+      if (!linkedChildIds.includes(childId)) {
+        return res.status(403).json({ success: false, message: 'Filho não vinculado' });
+      }
+
+      const { maxScreenTimeHours, sleepTime, mealTimes, familyTimeHours } = body;
+
+      try {
+        const updateFields = { updatedAt: new Date() };
+        if (maxScreenTimeHours !== undefined) updateFields.maxScreenTimeHours = Number(maxScreenTimeHours);
+        if (sleepTime !== undefined) updateFields.sleepTime = sleepTime;
+        if (mealTimes !== undefined) updateFields.mealTimes = mealTimes;
+        if (familyTimeHours !== undefined) updateFields.familyTimeHours = Number(familyTimeHours);
+
+        await mongoDb.collection('users').updateOne(
+          { _id: new mongoose.Types.ObjectId(childId) },
+          { $set: updateFields }
+        );
+
+        const updatedChild = await mongoDb.collection('users').findOne(
+          { _id: new mongoose.Types.ObjectId(childId) },
+          { projection: { password: 0 } }
+        );
+
+        return res.json({
+          success: true,
+          data: {
+            maxScreenTimeHours: updatedChild.maxScreenTimeHours || 4,
+            sleepTime: updatedChild.sleepTime || '22:00',
+            mealTimes: updatedChild.mealTimes || [],
+            familyTimeHours: updatedChild.familyTimeHours || 2
+          },
+          message: 'Definições atualizadas!'
+        });
+      } catch (e) {
+        return res.status(500).json({ success: false, message: 'Erro ao atualizar definições: ' + e.message });
+      }
+    }
+
+    // GET /api/parent/child-settings/:childId
+    if (path.match(/^\/api\/parent\/child-settings\/[\w-]+$/) && method === 'GET') {
+      if (!currentUser) return authError(res);
+      if (currentUser.role !== 'parent') {
+        return res.status(403).json({ success: false, message: 'Apenas pais podem ver definições' });
+      }
+      const childId = path.split('/').pop();
+
+      // Verify child is linked
+      const linkedChildIds = (currentUser.linkedChildren || []).map(c =>
+        typeof c === 'object' ? c.toString() : c
+      );
+      if (!linkedChildIds.includes(childId)) {
+        return res.status(403).json({ success: false, message: 'Filho não vinculado' });
+      }
+
+      try {
+        const child = await mongoDb.collection('users').findOne(
+          { _id: new mongoose.Types.ObjectId(childId) },
+          { projection: { password: 0 } }
+        );
+        if (!child) return res.status(404).json({ success: false, message: 'Filho não encontrado' });
+
+        // Get weekly completed activities
+        const oneWeekAgo = new Date();
+        oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+        const completedThisWeek = await mongoDb.collection('activities').countDocuments({
+          assignedTo: child._id,
+          'completedBy.validatedBy': { $exists: true },
+          'completedBy.completedAt': { $gte: oneWeekAgo }
+        });
+
+        return res.json({
+          success: true,
+          data: {
+            maxScreenTimeHours: child.maxScreenTimeHours || 4,
+            sleepTime: child.sleepTime || '22:00',
+            mealTimes: child.mealTimes || [],
+            familyTimeHours: child.familyTimeHours || 2,
+            totalPoints: child.totalPoints || 0,
+            currentStreak: child.currentStreak || 0,
+            completedActivitiesThisWeek: completedThisWeek
+          }
+        });
+      } catch (e) {
+        return res.status(500).json({ success: false, message: 'Erro ao obter definições: ' + e.message });
+      }
+    }
+
+    // PUT /api/parent/validate-photo/:photoId
+    if (path.match(/^\/api\/parent\/validate-photo\/[\w-]+$/) && method === 'PUT') {
+      if (!currentUser) return authError(res);
+      if (currentUser.role !== 'parent') {
+        return res.status(403).json({ success: false, message: 'Apenas pais podem validar fotos' });
+      }
+      const photoId = path.split('/').pop();
+      const { approved } = body;
+
+      if (approved === undefined) {
+        return res.status(400).json({ success: false, message: 'approved obrigatório' });
+      }
+
+      try {
+        const photo = await mongoDb.collection('photos').findOne({ _id: new mongoose.Types.ObjectId(photoId) });
+        if (!photo) return res.status(404).json({ success: false, message: 'Foto não encontrada' });
+
+        // Verify photo belongs to a linked child
+        const linkedChildIds = (currentUser.linkedChildren || []).map(c =>
+          typeof c === 'object' ? c.toString() : c
+        );
+        const uploaderId = photo.uploadedBy?.toString() || '';
+        if (!linkedChildIds.includes(uploaderId)) {
+          return res.status(403).json({ success: false, message: 'Foto não pertence a um filho vinculado' });
+        }
+
+        if (approved) {
+          // Mark photo as approved
+          await mongoDb.collection('photos').updateOne(
+            { _id: new mongoose.Types.ObjectId(photoId) },
+            { $set: { status: 'approved', aiAnalysis: { ...(photo.aiAnalysis || {}), status: 'approved', validatedByParent: true }, updatedAt: new Date() } }
+          );
+
+          // Complete the associated activity and award points
+          if (photo.activity) {
+            const activity = await mongoDb.collection('activities').findOne({ _id: photo.activity });
+            if (activity) {
+              // Check if already completed
+              const already = (activity.completedBy || []).find(c =>
+                (c.user?.toString && c.user.toString() === uploaderId) ||
+                c.user === photo.uploadedBy ||
+                c.user?.toString() === uploaderId
+              );
+
+              if (!already) {
+                const pointsVal = activity.pointsValue || 10;
+                await mongoDb.collection('activities').updateOne(
+                  { _id: activity._id },
+                  {
+                    $push: { completedBy: { user: photo.uploadedBy, completedAt: new Date(), validatedBy: currentUser._id, pointsEarned: pointsVal } },
+                    $set: { status: 'concluida', updatedAt: new Date() }
+                  }
+                );
+                await mongoDb.collection('users').updateOne(
+                  { _id: photo.uploadedBy },
+                  { $inc: { totalPoints: pointsVal, currentStreak: 1 } }
+                );
+              }
+            }
+          }
+
+          // Notify child
+          try {
+            await mongoDb.collection('notifications').insertOne({
+              recipient: photo.uploadedBy,
+              sender: currentUser._id,
+              type: 'photo_approved',
+              title: 'Foto Aprovada!',
+              message: 'O teu pai/mãe aprovou a tua foto. +pontos!',
+              relatedId: new mongoose.Types.ObjectId(photoId),
+              isRead: false,
+              createdAt: new Date()
+            });
+          } catch (e) {}
+
+          return res.json({ success: true, message: 'Foto aprovada e pontos atribuídos!' });
+        } else {
+          // Mark photo as rejected
+          await mongoDb.collection('photos').updateOne(
+            { _id: new mongoose.Types.ObjectId(photoId) },
+            { $set: { status: 'rejected', aiAnalysis: { ...(photo.aiAnalysis || {}), status: 'rejected', validatedByParent: true }, updatedAt: new Date() } }
+          );
+
+          // Notify child
+          try {
+            await mongoDb.collection('notifications').insertOne({
+              recipient: photo.uploadedBy,
+              sender: currentUser._id,
+              type: 'photo_rejected',
+              title: 'Foto Rejeitada',
+              message: 'O teu pai/mãe rejeitou a tua foto. Tenta novamente!',
+              relatedId: new mongoose.Types.ObjectId(photoId),
+              isRead: false,
+              createdAt: new Date()
+            });
+          } catch (e) {}
+
+          return res.json({ success: true, message: 'Foto rejeitada.' });
+        }
+      } catch (e) {
+        return res.status(500).json({ success: false, message: 'Erro ao validar foto: ' + e.message });
+      }
+    }
+
+    // ============================================================
     // PHOTO ROUTES
     // ============================================================
 
@@ -924,6 +1135,27 @@ module.exports = async function handler(req, res) {
       return res.json({ success: true, data: photos });
     }
 
+    // GET /api/photos/child/:childId
+    if (path.match(/^\/api\/photos\/child\/[\w-]+$/) && method === 'GET') {
+      if (!currentUser) return authError(res);
+      if (currentUser.role !== 'parent') {
+        return res.status(403).json({ success: false, message: 'Apenas pais podem ver fotos dos filhos' });
+      }
+      const childId = path.split('/').pop();
+
+      const linkedChildIds = (currentUser.linkedChildren || []).map(c =>
+        typeof c === 'object' ? c.toString() : c
+      );
+      if (!linkedChildIds.includes(childId)) {
+        return res.status(403).json({ success: false, message: 'Filho não vinculado' });
+      }
+
+      const photos = await mongoDb.collection('photos')
+        .find({ uploadedBy: new mongoose.Types.ObjectId(childId) })
+        .sort({ createdAt: -1 }).limit(50).toArray();
+      return res.json({ success: true, data: photos });
+    }
+
     // GET /api/photos/:id
     if (path.match(/^\/api\/photos\/[\w-]+$/) && method === 'GET') {
       if (!currentUser) return authError(res);
@@ -968,7 +1200,6 @@ module.exports = async function handler(req, res) {
     // POST /api/ai/analyze-photo
     if (path === '/api/ai/analyze-photo' && method === 'POST') {
       if (!currentUser) return authError(res);
-
       const { photoId } = body;
       if (!photoId) return res.status(400).json({ success: false, message: 'photoId obrigatório' });
 
@@ -976,51 +1207,131 @@ module.exports = async function handler(req, res) {
         const photo = await mongoDb.collection('photos').findOne({ _id: new mongoose.Types.ObjectId(photoId) });
         if (!photo) return res.status(404).json({ success: false, message: 'Foto não encontrada' });
 
-        // Try AI analysis with OpenAI if available
         let analysis = {
-          hasFace: false,
-          isSelfie: false,
           isOutdoor: false,
-          description: 'Foto registada',
-          status: 'approved'
+          isActivityRelated: false,
+          isScreenCapture: false,
+          appearsReal: true,
+          description: '',
+          confidence: 0,
+          status: 'pending_review',
+          flaggedIssues: []
         };
 
         try {
-          if (process.env.OPENAI_API_KEY) {
-            const ZAI = require('z-ai-web-dev-sdk');
-            // Simple vision analysis placeholder - just approve the photo
-            analysis = {
-              hasFace: false,
-              isSelfie: false,
-              isOutdoor: true,
-              description: 'Foto de atividade outdoor registada',
-              status: 'approved'
-            };
+          // Fetch image as base64 from URL
+          const axios = require('axios');
+          const imageResponse = await axios.get(photo.filePath, { responseType: 'arraybuffer', timeout: 15000 });
+          const base64Image = Buffer.from(imageResponse.data).toString('base64');
+          const mimeType = 'image/jpeg';
+
+          // Use VLM to analyze the photo
+          const ZAI = require('z-ai-web-dev-sdk');
+          const zai = await ZAI.create();
+          const completion = await zai.chat.completions.create({
+            messages: [
+              {
+                role: 'system',
+                content: 'You are a photo verification assistant for a children\'s digital detox app. Analyze photos to determine if they show real offline activities. Respond ONLY in valid JSON format with these exact fields: { "isOutdoor": boolean, "isActivityRelated": boolean, "isScreenCapture": boolean, "appearsReal": boolean, "description": "short description in Portuguese", "confidence": 0-100, "status": "approved" or "rejected" or "pending_review", "flaggedIssues": ["array of issues"] }. Rules: isScreenCapture=true if photo shows a phone/tablet/computer screen, screenshot, or digital content. appearsReal=false if photo looks like it was taken from the internet, is a stock photo, or is digitally manipulated. status="rejected" if isScreenCapture=true or appearsReal=false. status="approved" if isActivityRelated=true and appearsReal=true and confidence>=60. Otherwise status="pending_review".'
+              },
+              {
+                role: 'user',
+                content: [
+                  {
+                    type: 'image_url',
+                    image_url: { url: `data:${mimeType};base64,${base64Image}` }
+                  },
+                  {
+                    type: 'text',
+                    text: 'Analise esta foto e determine: 1) Se parece ser uma foto real tirada pelo utilizador (nao da internet) 2) Se mostra uma atividade offline (desporto, leitura, natureza, arte, culinaria, etc) 3) Se contem capturas de ecrã de telemóvel/computador 4) Se há indícios de manipulação digital. Responda em JSON.'
+                  }
+                ]
+              }
+            ]
+          });
+
+          const responseText = completion.choices[0]?.message?.content || '';
+          // Parse JSON from response
+          const jsonMatch = responseText.match(/\{[\s\S]*\}/);
+          if (jsonMatch) {
+            analysis = JSON.parse(jsonMatch[0]);
           }
-        } catch (e) {
-          console.log('AI analysis not available, using fallback');
+          console.log('[AI ANALYSIS]', JSON.stringify(analysis));
+        } catch (aiError) {
+          console.error('[AI ANALYSIS ERROR]', aiError.message);
+          analysis.status = 'pending_review';
+          analysis.description = 'Análise AI indisponível. Aguardando validação do pai.';
+          analysis.flaggedIssues = ['AI indisponível'];
         }
 
         // Update photo with analysis
         await mongoDb.collection('photos').updateOne(
           { _id: new mongoose.Types.ObjectId(photoId) },
-          {
-            $set: {
-              aiAnalysis: analysis,
-              status: 'approved',
-              updatedAt: new Date()
-            }
-          }
+          { $set: { aiAnalysis: analysis, status: analysis.status, updatedAt: new Date() } }
         );
+
+        // If approved, auto-complete the associated activity
+        if (analysis.status === 'approved' && photo.activity) {
+          try {
+            const activity = await mongoDb.collection('activities').findOne({ _id: photo.activity });
+            if (activity) {
+              const uploaderId = photo.uploadedBy;
+              const already = (activity.completedBy || []).find(c =>
+                (c.user?.toString && c.user.toString() === uploaderId.toString()) ||
+                c.user === uploaderId ||
+                c.user?.toString() === uploaderId.toString()
+              );
+              if (!already) {
+                const pointsVal = activity.pointsValue || 10;
+                await mongoDb.collection('activities').updateOne(
+                  { _id: activity._id },
+                  {
+                    $push: { completedBy: { user: uploaderId, completedAt: new Date(), validatedBy: currentUser._id, pointsEarned: pointsVal } },
+                    $set: { status: 'concluida', updatedAt: new Date() }
+                  }
+                );
+                await mongoDb.collection('users').updateOne(
+                  { _id: uploaderId },
+                  { $inc: { totalPoints: pointsVal, currentStreak: 1 } }
+                );
+                try {
+                  await mongoDb.collection('points').insertOne({
+                    user: uploaderId,
+                    activity: activity._id,
+                    section: activity.section || 'fora_escola',
+                    points: pointsVal,
+                    awardedBy: currentUser._id,
+                    isStreakBonus: false,
+                    createdAt: new Date()
+                  });
+                } catch (ptErr) {}
+                try {
+                  await mongoDb.collection('notifications').insertOne({
+                    recipient: uploaderId,
+                    sender: currentUser._id,
+                    type: 'photo_approved',
+                    title: 'Foto Aprovada pela IA!',
+                    message: `A IA aprovou a tua foto da atividade "${activity.title}". +${pointsVal} pontos!`,
+                    relatedId: new mongoose.Types.ObjectId(photoId),
+                    isRead: false,
+                    createdAt: new Date()
+                  });
+                } catch (nErr) {}
+              }
+            }
+          } catch (completeErr) {
+            console.error('[AUTO COMPLETE ERROR]', completeErr.message);
+          }
+        }
 
         return res.json({
           success: true,
           data: { photoId, analysis },
-          message: analysis.status === 'approved' ? 'Foto aprovada!' : 'Foto pendente revisão'
+          message: analysis.status === 'approved' ? 'Foto aprovada pela IA!' : analysis.status === 'rejected' ? 'Foto rejeitada pela IA.' : 'Foto enviada para validação do pai.'
         });
       } catch (e) {
-        console.error('[AI ANALYZE] Error:', e.message);
-        return res.status(500).json({ success: false, message: 'Erro na análise: ' + e.message });
+        console.error('[ANALYZE PHOTO ERROR]', e.message);
+        return res.status(500).json({ success: false, message: 'Erro ao analisar foto: ' + e.message });
       }
     }
 

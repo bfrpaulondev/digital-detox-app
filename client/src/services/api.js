@@ -92,9 +92,18 @@ export const dashboardAPI = {
 // Photo API
 export const photoAPI = {
   upload: (data) => api.post('/photos/upload', data), // Now sends JSON with base64
+  uploadAndAnalyze: (data) => api.post('/photos/upload-analyze', data),
   getAll: (params) => api.get('/photos', { params }),
   getById: (id) => api.get(`/photos/${id}`),
   delete: (id) => api.delete(`/photos/${id}`)
+};
+
+// Parent API
+export const parentAPI = {
+  getChildSettings: (childId) => api.get(`/parent/child-settings/${childId}`),
+  updateChildSettings: (childId, data) => api.put(`/parent/child-settings/${childId}`, data),
+  validatePhoto: (photoId, data) => api.put(`/parent/validate-photo/${photoId}`, data),
+  getChildPhotos: (childId) => api.get(`/photos/child/${childId}`)
 };
 
 // Calendar API
