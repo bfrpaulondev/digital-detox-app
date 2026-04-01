@@ -13,8 +13,8 @@ const notificationSchema = new mongoose.Schema({
   type: {
     type: String,
     enum: [
-      'info', 'achievement', 'pet_update', 'activity_validated',
-      'parent_alert', 'school_alert', 'reminder', 'ranking_update'
+      'info', 'achievement', 'pet_update', 'activity_validated', 'activity_rejected',
+      'parent_alert', 'school_alert', 'reminder', 'ranking_update', 'punishment'
     ],
     required: true
   },

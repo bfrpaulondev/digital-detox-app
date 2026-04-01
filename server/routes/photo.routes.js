@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { protect } = require('../middleware/auth');
+const { protect, authorize } = require('../middleware/auth');
 const { cloudinary } = require('../middleware/upload');
 const Photo = require('../models/Photo');
 
@@ -55,6 +55,35 @@ router.get('/', protect, async (req, res) => {
 
     const photos = await Photo.find(query)
       .populate('activity', 'title category')
+      .populate('validatedBy', 'fullName')
+      .sort({ createdAt: -1 });
+
+    res.json({ success: true, data: photos });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// @route   GET /api/photos/child/:childId
+// @desc    Get photos of a specific child (parent only)
+// NOTE: Must be before /:id to avoid route conflict
+router.get('/child/:childId', protect, authorize('parent'), async (req, res) => {
+  try {
+    const childId = req.params.childId;
+
+    // Verify this child belongs to the parent
+    const isChild = req.user.linkedChildren.some(c => c.toString() === childId);
+    if (!isChild) {
+      return res.status(403).json({ success: false, message: 'Este filho não está vinculado à sua conta.' });
+    }
+
+    const { status } = req.query;
+    const query = { uploadedBy: childId };
+    if (status) query.status = status;
+
+    const photos = await Photo.find(query)
+      .populate('activity', 'title category')
+      .populate('uploadedBy', 'fullName')
       .populate('validatedBy', 'fullName')
       .sort({ createdAt: -1 });
 

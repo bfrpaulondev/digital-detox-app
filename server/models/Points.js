@@ -9,7 +9,7 @@ const pointsSchema = new mongoose.Schema({
   // Source
   source: {
     type: String,
-    enum: ['atividade', 'missao', 'presenca', 'ranking', 'bonus_streak', 'alimentacao_pet', 'recompensa'],
+    enum: ['atividade', 'missao', 'presenca', 'ranking', 'bonus_streak', 'alimentacao_pet', 'recompensa', 'deducao'],
     required: true
   },
   activity: {

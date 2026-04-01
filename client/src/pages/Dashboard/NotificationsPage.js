@@ -9,7 +9,10 @@ import {
   Pets as PetsIcon,
   CheckCircle as CheckIcon,
   Info as InfoIcon,
-  Warning as WarningIcon
+  Warning as WarningIcon,
+  Close as CloseIcon,
+  SentimentDissatisfied as SadIcon,
+  TrendingUp as TrendingIcon
 } from '@mui/icons-material';
 import AppHeader from '../../components/layout/AppHeader';
 import { dashboardAPI } from '../../services/api';
@@ -17,10 +20,14 @@ import { dashboardAPI } from '../../services/api';
 const iconMap = {
   school_alert: <SchoolIcon color="primary" />,
   activity_validated: <CheckIcon color="success" />,
+  activity_rejected: <CloseIcon color="error" />,
   achievement: <EmojiEventsIcon sx={{ color: '#FFD700' }} />,
   pet_update: <PetsIcon color="warning" />,
   parent_alert: <InfoIcon color="info" />,
-  reminder: <WarningIcon color="warning" />
+  reminder: <WarningIcon color="warning" />,
+  ranking_update: <TrendingIcon color="primary" />,
+  punishment: <SadIcon color="error" />,
+  info: <InfoIcon color="info" />
 };
 
 const NotificationsPage = () => {

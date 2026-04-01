@@ -1050,21 +1050,36 @@ module.exports = async function handler(req, res) {
             { $set: { status: 'rejected', aiAnalysis: { ...(photo.aiAnalysis || {}), status: 'rejected', validatedByParent: true }, updatedAt: new Date() } }
           );
 
-          // Notify child
+          // PUNISHMENT: deduct points and reset streak
+          const uploaderId = photo.uploadedBy;
           try {
+            await mongoDb.collection('users').updateOne(
+              { _id: uploaderId },
+              {
+                $inc: { totalPoints: -10, currentStreak: -1 },
+                $set: { updatedAt: new Date() }
+              }
+            );
+          } catch (punishErr) {
+            console.error('[PARENT REJECT PUNISHMENT ERROR]', punishErr.message);
+          }
+
+          // Notify child with details about which photo was rejected
+          try {
+            const actTitle = photo.activityId ? ((await mongoDb.collection('activities').findOne({ _id: photo.activityId }))?.title) : 'atividade';
             await mongoDb.collection('notifications').insertOne({
-              recipient: photo.uploadedBy,
+              recipient: uploaderId,
               sender: currentUser._id,
               type: 'photo_rejected',
-              title: 'Foto Rejeitada',
-              message: 'O teu pai/mãe rejeitou a tua foto. Tenta novamente!',
+              title: 'Foto Rejeitada pelo Pai',
+              message: `O teu pai/mãe rejeitou a foto da atividade "${actTitle}". -10 pontos (penalização). Tenta tirar uma foto real da tua atividade!`,
               relatedId: new mongoose.Types.ObjectId(photoId),
               isRead: false,
               createdAt: new Date()
             });
           } catch (e) {}
 
-          return res.json({ success: true, message: 'Foto rejeitada.' });
+          return res.json({ success: true, message: 'Foto rejeitada. -10 pontos ao aluno.' });
         }
       } catch (e) {
         return res.status(500).json({ success: false, message: 'Erro ao validar foto: ' + e.message });

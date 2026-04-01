@@ -85,6 +85,14 @@ const userSchema = new mongoose.Schema({
     type: String,
     default: '22:00'
   },
+  mealTimes: [{
+    type: { type: String, enum: ['Pequeno-almoço', 'Almoço', 'Lanche', 'Jantar'] },
+    time: { type: String }
+  }],
+  familyTimeHours: {
+    type: Number,
+    default: 2
+  },
   // Points and stats
   totalPoints: {
     type: Number,

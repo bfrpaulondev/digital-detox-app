@@ -198,8 +198,57 @@ router.put('/:id/validate', protect, authorize('teacher'), async (req, res) => {
         relatedModel: 'Activity'
       });
     } else {
+      // === REJECT WITH PUNISHMENT ===
       activity.completedBy[completionIndex].pointsEarned = 0;
+      activity.completedBy[completionIndex].validatedBy = req.user._id;
+      activity.completedBy[completionIndex].validatedAt = new Date();
       activity.status = 'rejeitada';
+
+      // Apply punishment - deduct 5 points and reset streak
+      const punishmentPoints = 5;
+      const student = await User.findById(studentId);
+      if (student) {
+        const previousPoints = student.totalPoints;
+        student.totalPoints = Math.max(0, student.totalPoints - punishmentPoints);
+        student.currentStreak = 0; // Reset streak
+        await student.save();
+
+        // Record point deduction
+        const actualDeduction = previousPoints - student.totalPoints;
+        if (actualDeduction > 0) {
+          await Points.create({
+            user: studentId,
+            source: 'deducao',
+            activity: activity._id,
+            section: activity.section,
+            points: actualDeduction,
+            description: `Punição: Atividade rejeitada pelo professor. -${actualDeduction} pontos`,
+            awardedBy: req.user._id
+          });
+        }
+
+        // Notify student - REJECTED
+        await Notification.create({
+          recipient: studentId,
+          sender: req.user._id,
+          type: 'activity_rejected',
+          title: 'Atividade Rejeitada ⚠️',
+          message: `O professor rejeitou a atividade "${activity.title}". Perdeste ${actualDeduction} pontos e o teu streak foi reiniciado. Tenta novamente!`,
+          relatedId: activity._id,
+          relatedModel: 'Activity'
+        });
+
+        // Notify student - PUNISHMENT
+        await Notification.create({
+          recipient: studentId,
+          sender: req.user._id,
+          type: 'punishment',
+          title: 'Punição Aplicada 😔',
+          message: `A tua atividade foi rejeitada pelo professor. -${actualDeduction} pontos. Streak reiniciado. Reveja as instruções e tente novamente!`,
+          relatedId: activity._id,
+          relatedModel: 'Activity'
+        });
+      }
     }
 
     await activity.save();
