@@ -730,12 +730,12 @@ const TurtleSVG = ({ species, mood, stage, size, interaction }) => {
         /* Baby: cute hexagonal/honeycomb pattern - simple */
         <g opacity="0.5">
           {/* Center hexagon approximation */}
-          <polygon points={`70,${shellCy - 10 * scl} ${78,${shellCy - 5 * scl} ${78,${shellCy + 5 * scl}} 70,${shellCy + 10 * scl} ${62,${shellCy + 5 * scl}} ${62,${shellCy - 5 * scl}}`}
+          <polygon points={`70,${shellCy - 10 * scl} ${78,${shellCy - 5 * scl} ${78,${shellCy + 5 * scl}} 70,${shellCy + 10 * scl} ${62,${shellCy + 5 * scl}} ${62,${shellCy - 5 * scl}`}
             fill="none" stroke={colors.secondary} strokeWidth={scl * 1.2} />
           {/* Small hexagons around */}
-          <polygon points={`70,${shellCy - 18 * scl} ${76,${shellCy - 15 * scl} ${76,${shellCy - 9 * scl}} 70,${shellCy - 12 * scl} ${64,${shellCy - 9 * scl}} ${64,${shellCy - 15 * scl}}`}
+          <polygon points={`70,${shellCy - 18 * scl} ${76,${shellCy - 15 * scl} ${76,${shellCy - 9 * scl}} 70,${shellCy - 12 * scl} ${64,${shellCy - 9 * scl}} ${64,${shellCy - 15 * scl}`}
             fill="none" stroke={colors.secondary} strokeWidth={scl * 0.8} />
-          <polygon points={`70,${shellCy + 12 * scl} ${76,${shellCy + 9 * scl} ${76,${shellCy + 15 * scl}} 70,${shellCy + 18 * scl} ${64,${shellCy + 15 * scl}} ${64,${shellCy + 9 * scl}}`}
+          <polygon points={`70,${shellCy + 12 * scl} ${76,${shellCy + 9 * scl} ${76,${shellCy + 15 * scl}} 70,${shellCy + 18 * scl} ${64,${shellCy + 15 * scl}} ${64,${shellCy + 9 * scl}`}
             fill="none" stroke={colors.secondary} strokeWidth={scl * 0.8} />
           <polygon points={`${58 * 1},${shellCy} ${58},${shellCy - 7} ${64},${shellCy - 4} ${64},${shellCy + 4} ${58},${shellCy + 7}`}
             fill="none" stroke={colors.secondary} strokeWidth={scl * 0.8} />
@@ -749,10 +749,10 @@ const TurtleSVG = ({ species, mood, stage, size, interaction }) => {
           <ellipse cx="70" cy={shellCy} rx={(shellRx - 4) * scl} ry={(shellRy - 4) * scl} fill="none" stroke={colors.accent} strokeWidth={scl * 2} opacity="0.5" />
           <ellipse cx="70" cy={shellCy} rx={(shellRx - 10) * scl} ry={(shellRy - 10) * scl} fill="none" stroke={colors.secondary} strokeWidth={scl * 1.5} opacity="0.4" />
           {/* Center star pattern */}
-          <polygon points={`70,${shellCy - 16 * scl} ${76,${shellCy - 4 * scl}} ${70,${shellCy + 16 * scl}} ${64,${shellCy - 4 * scl}}`}
+          <polygon points={`70,${shellCy - 16 * scl} ${76,${shellCy - 4 * scl}} ${70,${shellCy + 16 * scl}} ${64,${shellCy - 4 * scl}`}
             fill={colors.secondary} opacity="0.2" stroke={colors.secondary} strokeWidth={scl * 1} />
           {/* Hexagonal center */}
-          <polygon points={`70,${shellCy - 10 * scl} ${78,${shellCy - 5 * scl} ${78,${shellCy + 5 * scl}} 70,${shellCy + 10 * scl} ${62,${shellCy + 5 * scl}} ${62,${shellCy - 5 * scl}}`}
+          <polygon points={`70,${shellCy - 10 * scl} ${78,${shellCy - 5 * scl} ${78,${shellCy + 5 * scl}} 70,${shellCy + 10 * scl} ${62,${shellCy + 5 * scl}} ${62,${shellCy - 5 * scl}`}
             fill={colors.accent} opacity="0.3" stroke={colors.secondary} strokeWidth={scl * 1} />
           {/* Radiating lines */}
           {[0, 60, 120, 180, 240, 300].map((angle, i) => {
@@ -777,7 +777,7 @@ const TurtleSVG = ({ species, mood, stage, size, interaction }) => {
         /* Young: medium detail pattern */
         <g opacity="0.45">
           <ellipse cx="70" cy={shellCy} rx={(shellRx - 8) * scl} ry={(shellRy - 8) * scl} fill="none" stroke={colors.secondary} strokeWidth={scl * 1.5} />
-          <polygon points={`70,${shellCy - 10 * scl} ${77,${shellCy - 5 * scl} ${77,${shellCy + 5 * scl}} 70,${shellCy + 10 * scl} ${63,${shellCy + 5 * scl}} ${63,${shellCy - 5 * scl}}`}
+          <polygon points={`70,${shellCy - 10 * scl} ${77,${shellCy - 5 * scl} ${77,${shellCy + 5 * scl}} 70,${shellCy + 10 * scl} ${63,${shellCy + 5 * scl}} ${63,${shellCy - 5 * scl}`}
             fill="none" stroke={colors.secondary} strokeWidth={scl * 1.2} />
           {/* Cross lines */}
           <line x1="70" y1={shellCy - (shellRy - 10) * scl} x2="70" y2={shellCy + (shellRy - 10) * scl} stroke={colors.secondary} strokeWidth={scl * 1} />
