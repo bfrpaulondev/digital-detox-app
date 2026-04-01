@@ -1205,6 +1205,104 @@ module.exports = async function handler(req, res) {
     }
 
     // ============================================================
+    // SEED TEST PETS (no auth — public, for demo/testing only)
+    // ============================================================
+
+    // POST /api/seed-test-pets
+    if (path === '/api/seed-test-pets' && method === 'POST') {
+      const bcrypt = require('bcryptjs');
+      const hashedPassword = await bcrypt.hash('teste123', 12);
+
+      const testAccounts = [
+        { species: 'tartaruga', stage: 1, email: 'tartaruga.ovo@teste.pt', petName: 'Tartaruguita', fullName: 'Tartaruga Ovo', level: 1 },
+        { species: 'tartaruga', stage: 2, email: 'tartaruga.bebe@teste.pt', petName: 'TartarugaBaby', fullName: 'Tartaruga Bebé', level: 5 },
+        { species: 'tartaruga', stage: 3, email: 'tartaruga.jovem@teste.pt', petName: 'TartarugaTeen', fullName: 'Tartaruga Jovem', level: 10 },
+        { species: 'gato', stage: 1, email: 'gato.ovo@teste.pt', petName: 'Gatito', fullName: 'Gato Ovo', level: 1 },
+        { species: 'gato', stage: 2, email: 'gato.bebe@teste.pt', petName: 'GatoBaby', fullName: 'Gato Bebé', level: 5 },
+        { species: 'gato', stage: 3, email: 'gato.jovem@teste.pt', petName: 'GatoTeen', fullName: 'Gato Jovem', level: 10 },
+        { species: 'cao', stage: 1, email: 'cao.ovo@teste.pt', petName: 'Caozinho', fullName: 'Cão Ovo', level: 1 },
+        { species: 'cao', stage: 2, email: 'cao.bebe@teste.pt', petName: 'CaoBaby', fullName: 'Cão Bebé', level: 5 },
+        { species: 'cao', stage: 3, email: 'cao.jovem@teste.pt', petName: 'CaoTeen', fullName: 'Cão Jovem', level: 10 },
+        { species: 'passaro', stage: 1, email: 'passaro.ovo@teste.pt', petName: 'Passarito', fullName: 'Pássaro Ovo', level: 1 },
+        { species: 'passaro', stage: 2, email: 'passaro.bebe@teste.pt', petName: 'PassaroBaby', fullName: 'Pássaro Bebé', level: 5 },
+        { species: 'passaro', stage: 3, email: 'passaro.jovem@teste.pt', petName: 'PassaroTeen', fullName: 'Pássaro Jovem', level: 10 },
+      ];
+
+      const results = [];
+
+      for (const account of testAccounts) {
+        // Check if user already exists
+        const existing = await mongoDb.collection('users').findOne({ email: account.email });
+        if (existing) {
+          results.push({ email: account.email, status: 'skipped', reason: 'already exists' });
+          continue;
+        }
+
+        // Create user
+        const userId = new mongoose.Types.ObjectId();
+        await mongoDb.collection('users').insertOne({
+          _id: userId,
+          email: account.email,
+          password: hashedPassword,
+          role: 'student',
+          fullName: account.fullName,
+          dateOfBirth: '2012-01-01',
+          totalPoints: 500,
+          grade: '7',
+          isActive: true,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        });
+
+        // Create pet
+        // Calculate experience based on level (matching the feed route's progression)
+        let experience = 0;
+        let expToNext = 100;
+        for (let i = 1; i < account.level; i++) {
+          experience += expToNext;
+          expToNext = Math.floor(expToNext * 1.3);
+        }
+
+        await mongoDb.collection('pets').insertOne({
+          _id: new mongoose.Types.ObjectId(),
+          owner: userId,
+          species: account.species,
+          name: account.petName,
+          level: account.level,
+          experience: experience,
+          experienceToNextLevel: expToNext,
+          hunger: 80,
+          happiness: 80,
+          energy: 100,
+          health: 100,
+          evolutionStage: account.stage,
+          mood: 'feliz',
+          feedCount: 0,
+          totalPointsSpent: 0,
+          lastFed: new Date(),
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        });
+
+        results.push({
+          email: account.email,
+          password: 'teste123',
+          species: account.species,
+          petName: account.petName,
+          level: account.level,
+          evolutionStage: account.stage,
+          status: 'created',
+        });
+      }
+
+      return res.json({
+        success: true,
+        message: `Seed completed. ${results.filter(r => r.status === 'created').length} created, ${results.filter(r => r.status === 'skipped').length} skipped.`,
+        data: results,
+      });
+    }
+
+    // ============================================================
     // FALLBACK
     // ============================================================
     console.log(`[API] 404 - ${method} ${path}`);
