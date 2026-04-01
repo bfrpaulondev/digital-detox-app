@@ -397,6 +397,106 @@ const CatSVG = ({ species, mood, stage, size, interaction }) => {
   const headCy = isChibi ? 52 : 56;
   const eyeR = isChibi ? 6.5 : isAdult ? 5.5 : 6;
   const earH = isChibi ? 22 : isAdult ? 20 : 21;
+  // ── BABY (CHIBI) CAT ──────────────────────────────────────
+  if (isChibi) {
+    const cH = 28 * scl;
+    const cBx = 26 * scl;
+    const cBy = 24 * scl;
+    const cEy = 8 * scl;
+    const cHcy = 54 * scl;
+    const cBcy = 100 * scl;
+
+    return (
+      <svg width={size} height={size * 1.15} viewBox="0 0 140 160" style={{ animation: `${anim} ${isPlaying ? '1s' : '2.5s'} ease-in-out infinite` }}>
+        {/* Shadow */}
+        <ellipse cx="70" cy="152" rx={cBx + 4} ry="5" fill="rgba(0,0,0,0.08)" />
+
+        {/* Floating sparkles - always around baby */}
+        <g style={{ animation: `${sparkleAnim} 1.8s ease-in-out 0s infinite`, transformOrigin: '28px 35px' }}>
+          <path d={`M28,35 ${star_path}`} transform="translate(28,35)" fill="#FFD700" opacity="0.8" />
+        </g>
+        <g style={{ animation: `${sparkleAnim} 2.2s ease-in-out 0.5s infinite`, transformOrigin: '112px 50px' }}>
+          <path d={`M112,50 ${star_path}`} transform="translate(112,50) scale(0.7)" fill="#FF9800" opacity="0.7" />
+        </g>
+        <g style={{ animation: `${sparkleAnim} 2s ease-in-out 1s infinite`, transformOrigin: '32px 120px' }}>
+          <path d={`M32,120 ${star_path}`} transform="translate(32,120) scale(0.6)" fill="#FFEB3B" opacity="0.65" />
+        </g>
+
+        {/* Short stubby tail */}
+        <path
+          d={`M${70 + cBx * 0.85} ${cBcy - cBy * 0.3} Q${70 + cBx * 1.25} ${cBcy - cBy * 0.65} ${70 + cBx * 1.1} ${cBcy - cBy * 0.85}`}
+          stroke={colors.secondary} strokeWidth={scl * 5} fill="none" strokeLinecap="round"
+        />
+
+        {/* Round mochi body */}
+        <ellipse cx="70" cy={cBcy} rx={cBx} ry={cBy} fill={colors.primary} />
+        {/* Belly */}
+        <ellipse cx="70" cy={cBcy + 2} rx={cBx - 9} ry={cBy - 7} fill={colors.accent} />
+
+        {/* Tiny paws barely visible */}
+        <ellipse cx={70 - cBx * 0.35} cy={cBcy + cBy - 2} rx={5 * scl} ry={3 * scl} fill={colors.secondary} />
+        <ellipse cx={70 + cBx * 0.35} cy={cBcy + cBy - 2} rx={5 * scl} ry={3 * scl} fill={colors.secondary} />
+        {/* Paw pads */}
+        <ellipse cx={70 - cBx * 0.35} cy={cBcy + cBy} rx={2.5 * scl} ry={1.5 * scl} fill={colors.inner} />
+        <ellipse cx={70 + cBx * 0.35} cy={cBcy + cBy} rx={2.5 * scl} ry={1.5 * scl} fill={colors.inner} />
+
+        {/* Big chibi head */}
+        <circle cx="70" cy={cHcy} r={cH} fill={colors.primary} />
+        {/* Head highlight */}
+        <circle cx="66" cy={cHcy - cH * 0.15} r={cH * 0.45} fill="white" opacity="0.12" />
+
+        {/* Small rounded ears */}
+        <ellipse cx={70 - cH * 0.55} cy={cHcy - cH * 0.72} rx={7 * scl} ry={9 * scl} fill={colors.primary} transform={`rotate(-12, ${70 - cH * 0.55}, ${cHcy - cH * 0.72})`} />
+        <ellipse cx={70 + cH * 0.55} cy={cHcy - cH * 0.72} rx={7 * scl} ry={9 * scl} fill={colors.primary} transform={`rotate(12, ${70 + cH * 0.55}, ${cHcy - cH * 0.72})`} />
+        {/* Inner ears */}
+        <ellipse cx={70 - cH * 0.5} cy={cHcy - cH * 0.67} rx={4 * scl} ry={5.5 * scl} fill={colors.inner} transform={`rotate(-12, ${70 - cH * 0.5}, ${cHcy - cH * 0.67})`} />
+        <ellipse cx={70 + cH * 0.5} cy={cHcy - cH * 0.67} rx={4 * scl} ry={5.5 * scl} fill={colors.inner} transform={`rotate(12, ${70 + cH * 0.5}, ${cHcy - cH * 0.67})`} />
+
+        {/* Giant kawaii eyes */}
+        {mood === 'sonolento' ? (
+          <g>
+            <line x1={70 - cH * 0.35} y1={cHcy - 2} x2={70 - cH * 0.08} y2={cHcy - 2} stroke="#333" strokeWidth={scl * 2.5} strokeLinecap="round" />
+            <line x1={70 + cH * 0.08} y1={cHcy - 2} x2={70 + cH * 0.35} y2={cHcy - 2} stroke="#333" strokeWidth={scl * 2.5} strokeLinecap="round" />
+          </g>
+        ) : mood === 'brincalhao' ? (
+          <g>
+            <KawaiiEye cx={70 - cH * 0.22} cy={cHcy - 2} r={cEy} closed={false} big={mood === 'energico'} scl={scl} />
+            <line x1={70 + cH * 0.08} y1={cHcy - 2} x2={70 + cH * 0.35} y2={cHcy - 2} stroke="#333" strokeWidth={scl * 2.5} strokeLinecap="round" />
+          </g>
+        ) : (
+          <g>
+            <KawaiiEye cx={70 - cH * 0.22} cy={cHcy - 2} r={cEy} closed={false} big={mood === 'energico'} scl={scl} />
+            <KawaiiEye cx={70 + cH * 0.22} cy={cHcy - 2} r={cEy} closed={false} big={mood === 'energico'} scl={scl} />
+          </g>
+        )}
+
+        {/* Tiny nose */}
+        <path d={`M${70 - 1.5 * scl} ${cHcy + 5} L70 ${cHcy + 7.5} L${70 + 1.5 * scl} ${cHcy + 5} Z`} fill={colors.nose} />
+
+        {/* Mouth - ω default, mood overrides */}
+        {mood === 'triste' ? (
+          <path d={`M${70 - cH * 0.18} ${cHcy + 12} Q70 ${cHcy + 8} ${70 + cH * 0.18} ${cHcy + 12}`} stroke="#333" strokeWidth={scl * 1.2} fill="none" />
+        ) : mood === 'com_fome' ? (
+          <ellipse cx="70" cy={cHcy + 11} rx={3.5 * scl} ry={3 * scl} fill="#555" />
+        ) : mood === 'doente' ? (
+          <circle cx="70" cy={cHcy + 11} r={2.5 * scl} fill="#9C27B0" opacity="0.3" />
+        ) : (
+          /* ω mouth */
+          <path d={`M${70 - cH * 0.14} ${cHcy + 9} Q${70 - cH * 0.05} ${cHcy + 13} 70 ${cHcy + 10} Q${70 + cH * 0.05} ${cHcy + 13} ${70 + cH * 0.14} ${cHcy + 9}`} stroke="#333" strokeWidth={scl * 1.2} fill="none" />
+        )}
+
+        {/* Short stubby whiskers */}
+        <line x1={70 - cH * 0.52} y1={cHcy + 3} x2={70 - cH * 0.28} y2={cHcy + 5} stroke="#888" strokeWidth={scl * 0.7} />
+        <line x1={70 - cH * 0.55} y1={cHcy + 7} x2={70 - cH * 0.28} y2={cHcy + 7} stroke="#888" strokeWidth={scl * 0.7} />
+        <line x1={70 + cH * 0.28} y1={cHcy + 5} x2={70 + cH * 0.52} y2={cHcy + 3} stroke="#888" strokeWidth={scl * 0.7} />
+        <line x1={70 + cH * 0.28} y1={cHcy + 7} x2={70 + cH * 0.55} y2={cHcy + 7} stroke="#888" strokeWidth={scl * 0.7} />
+
+        {/* Always-visible rosy cheeks */}
+        <ellipse cx={70 - cH * 0.42} cy={cHcy + 4} rx={5.5 * scl} ry={3.5 * scl} fill="#FFAB91" opacity={isPetting ? 0.85 : 0.65} />
+        <ellipse cx={70 + cH * 0.42} cy={cHcy + 4} rx={5.5 * scl} ry={3.5 * scl} fill="#FFAB91" opacity={isPetting ? 0.85 : 0.65} />
+      </svg>
+    );
+  }
 
   return (
     <svg width={size} height={size * 1.15} viewBox="0 0 140 160" style={{ animation: `${anim} ${isPlaying ? '1s' : '2.5s'} ease-in-out infinite` }}>
@@ -503,6 +603,106 @@ const DogSVG = ({ species, mood, stage, size, interaction }) => {
   const bodyCy = isChibi ? 102 : 110;
   const headCy = isChibi ? 54 : 58;
   const eyeR = isChibi ? 6 : isAdult ? 5 : 5.5;
+  // ── BABY (CHIBI) DOG ──────────────────────────────────────
+  if (isChibi) {
+    const cH = 30 * scl;
+    const cBx = 28 * scl;
+    const cBy = 26 * scl;
+    const cEy = 8.5 * scl;
+    const cHcy = 52 * scl;
+    const cBcy = 102 * scl;
+
+    return (
+      <svg width={size} height={size * 1.15} viewBox="0 0 140 160" style={{ animation: `${anim} ${isPlaying ? '1s' : '2.5s'} ease-in-out infinite` }}>
+        {/* Shadow */}
+        <ellipse cx="70" cy="152" rx={cBx + 6} ry="5" fill="rgba(0,0,0,0.08)" />
+
+        {/* Tiny heart floating above head */}
+        <g style={{ animation: `${floatAnim} 2.5s ease-in-out 0s infinite` }}>
+          <path d="M70,18 C67,14 62,14 62,18 C62,22 70,26 70,26 C70,26 78,22 78,18 C78,14 73,14 70,18 Z" fill="#E91E63" opacity="0.7" />
+        </g>
+
+        {/* Tiny tail nub */}
+        <g style={{ transformOrigin: `${70 + cBx * 0.85}px ${cBcy - cBy * 0.4}px`, animation: (mood === 'feliz' || mood === 'brincalhao' || isPlaying) ? `${tailWag} 0.4s ease-in-out infinite` : 'none' }}>
+          <path
+            d={`M${70 + cBx * 0.85} ${cBcy - cBy * 0.4} Q${70 + cBx * 1.15} ${cBcy - cBy * 0.8} ${70 + cBx * 1.05} ${cBcy - cBy * 0.95}`}
+            stroke={colors.secondary} strokeWidth={scl * 6} fill="none" strokeLinecap="round"
+          />
+        </g>
+
+        {/* Chunky potato body */}
+        <ellipse cx="70" cy={cBcy} rx={cBx} ry={cBy} fill={colors.primary} />
+        {/* Belly */}
+        <ellipse cx="70" cy={cBcy + 3} rx={cBx - 10} ry={cBy - 8} fill={colors.accent} />
+
+        {/* Round pudgy paws */}
+        <ellipse cx={70 - cBx * 0.4} cy={cBcy + cBy - 2} rx={6 * scl} ry={4 * scl} fill={colors.secondary} />
+        <ellipse cx={70 + cBx * 0.4} cy={cBcy + cBy - 2} rx={6 * scl} ry={4 * scl} fill={colors.secondary} />
+        {/* Toe lines */}
+        <line x1={70 - cBx * 0.47} y1={cBcy + cBy} x2={70 - cBx * 0.47} y2={cBcy + cBy - 4} stroke={colors.secondary} strokeWidth={scl * 0.8} />
+        <line x1={70 - cBx * 0.4} y1={cBcy + cBy} x2={70 - cBx * 0.4} y2={cBcy + cBy - 4} stroke={colors.secondary} strokeWidth={scl * 0.8} />
+        <line x1={70 + cBx * 0.4} y1={cBcy + cBy} x2={70 + cBx * 0.4} y2={cBcy + cBy - 4} stroke={colors.secondary} strokeWidth={scl * 0.8} />
+        <line x1={70 + cBx * 0.47} y1={cBcy + cBy} x2={70 + cBx * 0.47} y2={cBcy + cBy - 4} stroke={colors.secondary} strokeWidth={scl * 0.8} />
+
+        {/* Big chibi head */}
+        <circle cx="70" cy={cHcy} r={cH} fill={colors.primary} />
+        {/* Forehead highlight */}
+        <circle cx="66" cy={cHcy - cH * 0.2} r={cH * 0.4} fill="white" opacity="0.1" />
+
+        {/* Extra floppy ears - almost covering head */}
+        <ellipse cx={70 - cH * 0.82} cy={cHcy + 2 * scl} rx={10 * scl} ry={20 * scl} fill={colors.secondary} transform={`rotate(22, ${70 - cH * 0.82}, ${cHcy + 2 * scl})`} />
+        <ellipse cx={70 + cH * 0.82} cy={cHcy + 2 * scl} rx={10 * scl} ry={20 * scl} fill={colors.secondary} transform={`rotate(-22, ${70 + cH * 0.82}, ${cHcy + 2 * scl})`} />
+        {/* Inner ears */}
+        <ellipse cx={70 - cH * 0.78} cy={cHcy + 4 * scl} rx={6 * scl} ry={14 * scl} fill={colors.inner} transform={`rotate(22, ${70 - cH * 0.78}, ${cHcy + 4 * scl})`} />
+        <ellipse cx={70 + cH * 0.78} cy={cHcy + 4 * scl} rx={6 * scl} ry={14 * scl} fill={colors.inner} transform={`rotate(-22, ${70 + cH * 0.78}, ${cHcy + 4 * scl})`} />
+
+        {/* Super big round puppy eyes */}
+        {mood === 'sonolento' ? (
+          <g>
+            <line x1={70 - cH * 0.32} y1={cHcy - 3} x2={70 - cH * 0.08} y2={cHcy - 3} stroke="#333" strokeWidth={scl * 2.5} strokeLinecap="round" />
+            <line x1={70 + cH * 0.08} y1={cHcy - 3} x2={70 + cH * 0.32} y2={cHcy - 3} stroke="#333" strokeWidth={scl * 2.5} strokeLinecap="round" />
+          </g>
+        ) : (
+          <g>
+            <KawaiiEye cx={70 - cH * 0.2} cy={cHcy - 3} r={cEy} closed={false} big={mood === 'energico'} scl={scl} />
+            <KawaiiEye cx={70 + cH * 0.2} cy={cHcy - 3} r={cEy} closed={false} big={mood === 'energico'} scl={scl} />
+          </g>
+        )}
+
+        {/* Eyebrows for doente */}
+        {mood === 'doente' && (
+          <g>
+            <line x1={70 - cH * 0.3} y1={cHcy - 11} x2={70 - cH * 0.1} y2={cHcy - 9} stroke="#555" strokeWidth={scl * 1.5} strokeLinecap="round" />
+            <line x1={70 + cH * 0.1} y1={cHcy - 9} x2={70 + cH * 0.3} y2={cHcy - 11} stroke="#555" strokeWidth={scl * 1.5} strokeLinecap="round" />
+          </g>
+        )}
+
+        {/* Nose */}
+        <ellipse cx="70" cy={cHcy + 4 * scl} rx={4.5 * scl} ry={3 * scl} fill={colors.nose} />
+        <ellipse cx="69" cy={cHcy + 3.5 * scl} rx={1.2 * scl} ry={0.8 * scl} fill="white" opacity="0.4" />
+
+        {/* Mouth & always-sticking-out tongue */}
+        {mood === 'triste' ? (
+          <path d={`M${70 - cH * 0.12} ${cHcy + 13} Q70 ${cHcy + 9} ${70 + cH * 0.12} ${cHcy + 13}`} stroke="#333" strokeWidth={scl * 1.3} fill="none" />
+        ) : mood === 'com_fome' ? (
+          <g>
+            <ellipse cx="70" cy={cHcy + 12} rx={4 * scl} ry={5 * scl} fill="#555" />
+            <ellipse cx="70" cy={cHcy + 15} rx={3 * scl} ry={4 * scl} fill="#F48FB1" />
+          </g>
+        ) : (
+          <g>
+            <path d={`M${70 - cH * 0.12} ${cHcy + 7.5} Q70 ${cHcy + 11} ${70 + cH * 0.12} ${cHcy + 7.5}`} stroke="#333" strokeWidth={scl * 1.3} fill="none" />
+            {/* Always tiny tongue sticking out */}
+            <ellipse cx="70" cy={cHcy + 12} rx={3 * scl} ry={4 * scl} fill="#F48FB1" />
+          </g>
+        )}
+
+        {/* Extra big rosy cheeks - always visible */}
+        <ellipse cx={70 - cH * 0.38} cy={cHcy + 5} rx={6 * scl} ry={4 * scl} fill="#FFAB91" opacity={isPetting ? 0.9 : 0.7} />
+        <ellipse cx={70 + cH * 0.38} cy={cHcy + 5} rx={6 * scl} ry={4 * scl} fill="#FFAB91" opacity={isPetting ? 0.9 : 0.7} />
+      </svg>
+    );
+  }
 
   return (
     <svg width={size} height={size * 1.15} viewBox="0 0 140 160" style={{ animation: `${anim} ${isPlaying ? '1s' : '2.5s'} ease-in-out infinite` }}>
@@ -607,6 +807,85 @@ const BirdSVG = ({ species, mood, stage, size, interaction }) => {
   const headCy = isChibi ? 50 : 52;
   const headCx = isChibi ? 62 : 60;
   const eyeR = isChibi ? 5.5 : isAdult ? 5 : 5;
+  // ── BABY (CHIBI) BIRD ──────────────────────────────────────
+  if (isChibi) {
+    const cH = 24 * scl;
+    const cBx = 20 * scl;
+    const cBy = 24 * scl;
+    const cEy = 7 * scl;
+    const cHcy = 50 * scl;
+    const cBcy = 106 * scl;
+
+    return (
+      <svg width={size} height={size * 1.15} viewBox="0 0 140 160" style={{ animation: `${anim} ${isPlaying ? '1s' : '2.5s'} ease-in-out infinite` }}>
+        {/* Shadow */}
+        <ellipse cx="70" cy="152" rx={cBx + 2} ry="4" fill="rgba(0,0,0,0.08)" />
+
+        {/* Music notes floating - baby is chirping */}
+        <text x="105" y="38" fontSize="10" fill="#E91E63" opacity="0.6" style={{ animation: `${floatAnim} 2s ease-in-out 0s infinite` }}>♪</text>
+        <text x="28" y="55" fontSize="8" fill="#9C27B0" opacity="0.5" style={{ animation: `${floatAnim} 2.5s ease-in-out 0.6s infinite` }}>♫</text>
+
+        {/* Round fluffball body */}
+        <ellipse cx="70" cy={cBcy} rx={cBx} ry={cBy} fill={colors.primary} />
+        {/* Belly */}
+        <ellipse cx="70" cy={cBcy + 2} rx={cBx - 6} ry={cBy - 7} fill={colors.accent} />
+
+        {/* Tiny stub wings on sides */}
+        <ellipse cx={70 - cBx * 0.85} cy={cBcy - cBy * 0.1} rx={7 * scl} ry={5 * scl} fill={colors.secondary} transform={`rotate(20, ${70 - cBx * 0.85}, ${cBcy - cBy * 0.1})`} />
+        <ellipse cx={70 + cBx * 0.85} cy={cBcy - cBy * 0.1} rx={7 * scl} ry={5 * scl} fill={colors.secondary} transform={`rotate(-20, ${70 + cBx * 0.85}, ${cBcy - cBy * 0.1})`} />
+
+        {/* Simple stick legs */}
+        <line x1={70 - 5 * scl} y1={cBcy + cBy} x2={70 - 7 * scl} y2={cBcy + cBy + 10 * scl} stroke={colors.nose} strokeWidth={scl * 2} strokeLinecap="round" />
+        <line x1={70 + 5 * scl} y1={cBcy + cBy} x2={70 + 7 * scl} y2={cBcy + cBy + 10 * scl} stroke={colors.nose} strokeWidth={scl * 2} strokeLinecap="round" />
+        {/* Tiny feet */}
+        <line x1={70 - 11 * scl} y1={cBcy + cBy + 10 * scl} x2={70 - 3 * scl} y2={cBcy + cBy + 10 * scl} stroke={colors.nose} strokeWidth={scl * 1.8} strokeLinecap="round" />
+        <line x1={70 + 3 * scl} y1={cBcy + cBy + 10 * scl} x2={70 + 11 * scl} y2={cBcy + cBy + 10 * scl} stroke={colors.nose} strokeWidth={scl * 1.8} strokeLinecap="round" />
+
+        {/* Disproportionately large head */}
+        <circle cx="70" cy={cHcy} r={cH} fill={colors.primary} />
+        {/* Head highlight */}
+        <circle cx="67" cy={cHcy - cH * 0.15} r={cH * 0.4} fill="white" opacity="0.12" />
+
+        {/* Tiny tuft of 2 feathers on top */}
+        <ellipse cx={70 - 3 * scl} cy={cHcy - cH * 0.85} rx={2.5 * scl} ry={6 * scl} fill={colors.secondary} transform={`rotate(-12, ${70 - 3 * scl}, ${cHcy - cH * 0.85})`} />
+        <ellipse cx={70 + 3 * scl} cy={cHcy - cH * 0.88} rx={2 * scl} ry={5 * scl} fill={colors.primary} transform={`rotate(10, ${70 + 3 * scl}, ${cHcy - cH * 0.88})`} />
+
+        {/* Huge sparkly eyes */}
+        {mood === 'sonolento' ? (
+          <g>
+            <line x1={70 - cH * 0.32} y1={cHcy - 1} x2={70 - cH * 0.08} y2={cHcy - 1} stroke="#333" strokeWidth={scl * 2.2} strokeLinecap="round" />
+            <line x1={70 + cH * 0.08} y1={cHcy - 1} x2={70 + cH * 0.32} y2={cHcy - 1} stroke="#333" strokeWidth={scl * 2.2} strokeLinecap="round" />
+          </g>
+        ) : (
+          <g>
+            <KawaiiEye cx={70 - cH * 0.22} cy={cHcy - 1} r={cEy} closed={mood === 'triste'} big={mood === 'energico'} scl={scl} />
+            <KawaiiEye cx={70 + cH * 0.22} cy={cHcy - 1} r={cEy} closed={mood === 'triste'} big={mood === 'energico'} scl={scl} />
+          </g>
+        )}
+
+        {/* Tiny cute triangle beak */}
+        {(mood === 'feliz' || mood === 'brincalhao' || isPlaying) ? (
+          <g>
+            <polygon points={`${70 + cH * 0.55},${cHcy - 1} ${70 + cH * 1.1},${cHcy - 3} ${70 + cH * 0.55},${cHcy + 1}`} fill={colors.nose} />
+            <polygon points={`${70 + cH * 0.55},${cHcy + 1} ${70 + cH * 1.05},${cHcy + 4} ${70 + cH * 0.55},${cHcy + 3}`} fill="#EF6C00" />
+          </g>
+        ) : mood === 'triste' ? (
+          <polygon points={`${70 + cH * 0.55},${cHcy + 1} ${70 + cH * 0.95},${cHcy + 4} ${70 + cH * 0.55},${cHcy + 3}`} fill={colors.nose} opacity="0.8" />
+        ) : mood === 'com_fome' ? (
+          <g>
+            <polygon points={`${70 + cH * 0.55},${cHcy} ${70 + cH * 1.1},${cHcy + 2} ${70 + cH * 0.55},${cHcy + 4}`} fill="#F44336" />
+            <polygon points={`${70 + cH * 0.55},${cHcy + 4} ${70 + cH * 1.0},${cHcy + 7} ${70 + cH * 0.55},${cHcy + 6}`} fill="#D32F2F" />
+          </g>
+        ) : (
+          <polygon points={`${70 + cH * 0.55},${cHcy - 0.5} ${70 + cH * 1.1},${cHcy + 2} ${70 + cH * 0.55},${cHcy + 4}`} fill={colors.nose} />
+        )}
+
+        {/* Always-visible rosy cheeks */}
+        <ellipse cx={70 - cH * 0.35} cy={cHcy + 5} rx={4.5 * scl} ry={3 * scl} fill="#FFAB91" opacity={isPetting ? 0.8 : 0.6} />
+        <ellipse cx={70 + cH * 0.15} cy={cHcy + 5} rx={4.5 * scl} ry={3 * scl} fill="#FFAB91" opacity={isPetting ? 0.8 : 0.6} />
+      </svg>
+    );
+  }
 
   return (
     <svg width={size} height={size * 1.15} viewBox="0 0 140 160" style={{ animation: `${anim} ${isPlaying ? '1s' : '2.5s'} ease-in-out infinite` }}>
@@ -707,6 +986,112 @@ const TurtleSVG = ({ species, mood, stage, size, interaction }) => {
   const legRx = isChibi ? 8 : isAdult ? 12 : 10;
   const legRy = isChibi ? 6 : isAdult ? 9 : 8;
   const eyeR = isChibi ? 5.5 : isAdult ? 5 : 4.5;
+  // ── BABY (CHIBI) TURTLE ───────────────────────────────────
+  if (isChibi) {
+    const cSx = 28 * scl;
+    const cSy = 26 * scl;
+    const cH = 24 * scl;
+    const cEy = 8 * scl;
+    const cScy = 98 * scl;
+    const cHcy = 48 * scl;
+
+    return (
+      <svg width={size} height={size * 1.15} viewBox="0 0 140 160" style={{ animation: `${anim} ${isPlaying ? '1s' : '3s'} ease-in-out infinite` }}>
+        {/* Shadow */}
+        <ellipse cx="70" cy="152" rx={cSx + 2} ry="5" fill="rgba(0,0,0,0.08)" />
+
+        {/* Bubbles floating near shell */}
+        <circle cx="108" cy="75" r={3 * scl} fill="none" stroke="#90CAF9" strokeWidth={scl * 1} opacity="0.5" style={{ animation: `${floatAnim} 2.5s ease-in-out 0s infinite` }} />
+        <circle cx="115" cy="85" r={2 * scl} fill="none" stroke="#90CAF9" strokeWidth={scl * 0.8} opacity="0.4" style={{ animation: `${floatAnim} 3s ease-in-out 0.5s infinite` }} />
+        <circle cx="102" cy="65" r={1.5 * scl} fill="#90CAF9" opacity="0.3" style={{ animation: `${floatAnim} 2s ease-in-out 1s infinite` }} />
+
+        {/* Tiny triangle tail */}
+        <polygon points={`${70 + cSx * 0.85},${cScy + cSy * 0.3} ${70 + cSx * 1.05},${cScy + cSy * 0.5} ${70 + cSx * 0.95},${cScy + cSy * 0.15}`} fill={colors.primary} />
+
+        {/* Tiny stubby back legs */}
+        <ellipse cx={70 - cSx * 0.5} cy={cScy + cSy * 0.45} rx={5 * scl} ry={4 * scl} fill={colors.primary} />
+        <ellipse cx={70 + cSx * 0.5} cy={cScy + cSy * 0.45} rx={5 * scl} ry={4 * scl} fill={colors.primary} />
+        {/* Tiny stubby front legs */}
+        <ellipse cx={70 - cSx * 0.6} cy={cScy - cSy * 0.1} rx={5 * scl} ry={4 * scl} fill={colors.primary} />
+        <ellipse cx={70 + cSx * 0.6} cy={cScy - cSy * 0.1} rx={5 * scl} ry={4 * scl} fill={colors.primary} />
+        {/* Leg highlights */}
+        <ellipse cx={70 - cSx * 0.57} cy={cScy - cSy * 0.14} rx={2.5 * scl} ry={2 * scl} fill={colors.accent} opacity="0.4" />
+        <ellipse cx={70 + cSx * 0.57} cy={cScy - cSy * 0.14} rx={2.5 * scl} ry={2 * scl} fill={colors.accent} opacity="0.4" />
+
+        {/* Very round shell - almost circular */}
+        <ellipse cx="70" cy={cScy} rx={cSx} ry={cSy} fill={colors.secondary} />
+        <ellipse cx="70" cy={cScy - 2} rx={cSx - 3} ry={cSy - 3} fill={colors.primary} />
+        <ellipse cx="68" cy={cScy - 3} rx={cSx - 7} ry={cSy - 7} fill={colors.secondary} opacity="0.25" />
+
+        {/* Shell pattern - simple cute dots */}
+        <circle cx="70" cy={cScy - 6 * scl} r={2.5 * scl} fill={colors.secondary} opacity="0.4" />
+        <circle cx="70" cy={cScy + 6 * scl} r={2.5 * scl} fill={colors.secondary} opacity="0.4" />
+        <circle cx={70 - 8 * scl} cy={cScy} r={2 * scl} fill={colors.secondary} opacity="0.35" />
+        <circle cx={70 + 8 * scl} cy={cScy} r={2 * scl} fill={colors.secondary} opacity="0.35" />
+        <circle cx={70 - 5 * scl} cy={cScy - 5 * scl} r={1.8 * scl} fill={colors.secondary} opacity="0.3" />
+        <circle cx={70 + 5 * scl} cy={cScy - 5 * scl} r={1.8 * scl} fill={colors.secondary} opacity="0.3" />
+        <circle cx={70 - 5 * scl} cy={cScy + 5 * scl} r={1.8 * scl} fill={colors.secondary} opacity="0.3" />
+        <circle cx={70 + 5 * scl} cy={cScy + 5 * scl} r={1.8 * scl} fill={colors.secondary} opacity="0.3" />
+
+        {/* Shell rim highlight */}
+        <path
+          d={`M${70 - cSx * 0.6} ${cScy - cSy * 0.85} Q70 ${cScy - cSy * 1.02} ${70 + cSx * 0.6} ${cScy - cSy * 0.85}`}
+          fill="none" stroke="white" strokeWidth={scl * 1.5} opacity="0.2"
+        />
+
+        {/* Small bow/ribbon on shell */}
+        <g transform={`translate(${70 + cSx * 0.5}, ${cScy - cSy * 0.6})`}>
+          <ellipse cx="-4" cy="0" rx={5 * scl} ry={3 * scl} fill="#E91E63" opacity="0.8" />
+          <ellipse cx="4" cy="0" rx={5 * scl} ry={3 * scl} fill="#E91E63" opacity="0.8" />
+          <circle cx="0" cy="0" r={2 * scl} fill="#C2185B" />
+        </g>
+
+        {/* Short but visible neck */}
+        <rect x={70 - 6 * scl} y={cHcy + cH * 0.45} width={12 * scl} height={8 * scl} rx={6 * scl} fill={colors.primary} />
+
+        {/* Giant round head - pops way out */}
+        <circle cx="70" cy={cHcy} r={cH} fill={colors.primary} />
+        {/* Head highlight */}
+        <circle cx="67" cy={cHcy - cH * 0.15} r={cH * 0.45} fill="white" opacity="0.1" />
+
+        {/* Giant sparkly eyes - THE CUTEST */}
+        {mood === 'sonolento' ? (
+          <g>
+            <line x1={70 - cH * 0.3} y1={cHcy - 2} x2={70 - cH * 0.08} y2={cHcy - 2} stroke="#333" strokeWidth={scl * 2.2} strokeLinecap="round" />
+            <line x1={70 + cH * 0.08} y1={cHcy - 2} x2={70 + cH * 0.3} y2={cHcy - 2} stroke="#333" strokeWidth={scl * 2.2} strokeLinecap="round" />
+          </g>
+        ) : (
+          <g>
+            <KawaiiEye cx={70 - cH * 0.2} cy={cHcy - 2} r={cEy} closed={false} big={mood === 'energico'} scl={scl} />
+            <KawaiiEye cx={70 + cH * 0.2} cy={cHcy - 2} r={cEy} closed={false} big={mood === 'energico'} scl={scl} />
+          </g>
+        )}
+
+        {/* Nose - tiny cute dots */}
+        <circle cx={70 - 2 * scl} cy={cHcy + 5} r={1.2 * scl} fill={colors.nose} />
+        <circle cx={70 + 2 * scl} cy={cHcy + 5} r={1.2 * scl} fill={colors.nose} />
+
+        {/* Mouth - ω default, mood overrides */}
+        {mood === 'triste' ? (
+          <path d={`M${70 - cH * 0.15} ${cHcy + 10} Q70 ${cHcy + 6} ${70 + cH * 0.15} ${cHcy + 10}`} stroke="#333" strokeWidth={scl * 1.3} fill="none" />
+        ) : mood === 'com_fome' ? (
+          <ellipse cx="70" cy={cHcy + 9} rx={3 * scl} ry={2.5 * scl} fill="#555" />
+        ) : mood === 'doente' ? (
+          <g>
+            <path d={`M${70 - cH * 0.12} ${cHcy + 9} Q70 ${cHcy + 5} ${70 + cH * 0.12} ${cHcy + 9}`} stroke="#333" strokeWidth={scl * 1.2} fill="none" strokeDasharray="2 2" />
+            <circle cx="70" cy={cHcy + 10} r={1.5 * scl} fill="#9C27B0" opacity="0.3" />
+          </g>
+        ) : (
+          /* ω smile */
+          <path d={`M${70 - cH * 0.12} ${cHcy + 7} Q${70 - cH * 0.04} ${cHcy + 11} 70 ${cHcy + 8} Q${70 + cH * 0.04} ${cHcy + 11} ${70 + cH * 0.12} ${cHcy + 7}`} stroke="#333" strokeWidth={scl * 1.2} fill="none" />
+        )}
+
+        {/* Always-visible rosy cheeks */}
+        <ellipse cx={70 - cH * 0.38} cy={cHcy + 4} rx={5 * scl} ry={3 * scl} fill="#FFAB91" opacity={isPetting ? 0.85 : 0.65} />
+        <ellipse cx={70 + cH * 0.38} cy={cHcy + 4} rx={5 * scl} ry={3 * scl} fill="#FFAB91" opacity={isPetting ? 0.85 : 0.65} />
+      </svg>
+    );
+  }
 
   return (
     <svg width={size} height={size * 1.15} viewBox="0 0 140 160" style={{ animation: `${anim} ${isPlaying ? '1s' : '3s'} ease-in-out infinite` }}>
