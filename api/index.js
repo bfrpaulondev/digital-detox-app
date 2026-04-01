@@ -1226,8 +1226,18 @@ module.exports = async function handler(req, res) {
           const mimeType = photo.filePath.includes('.png') ? 'image/png' : 'image/jpeg';
 
           // Use OpenAI GPT-4o Vision to analyze the photo
-          const OpenAI = require('openai');
-          const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+          let openai = null;
+          try {
+            const OpenAI = require('openai');
+            openai = new OpenAI.default({ apiKey: process.env.OPENAI_API_KEY });
+          } catch (e1) {
+            try {
+              const OpenAI = require('openai').default;
+              openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+            } catch (e2) {
+              throw new Error('Failed to load OpenAI SDK: ' + (e1.message || e2.message));
+            }
+          }
 
           const completion = await openai.chat.completions.create({
             model: 'gpt-4o',
@@ -1273,10 +1283,10 @@ module.exports = async function handler(req, res) {
           }
           console.log('[AI ANALYSIS]', JSON.stringify(analysis));
         } catch (aiError) {
-          console.error('[AI ANALYSIS ERROR]', aiError.message);
+          console.error('[AI ANALYSIS ERROR]', aiError.message, aiError.stack);
           analysis.status = 'pending_review';
           analysis.description = 'Análise AI indisponível. Aguardando validação do pai.';
-          analysis.flaggedIssues = ['AI indisponível'];
+          analysis.flaggedIssues = ['AI indisponível: ' + (aiError.message || 'unknown')];
         }
 
         // Update photo with analysis
