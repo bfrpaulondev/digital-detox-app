@@ -1524,27 +1524,6 @@ module.exports = async function handler(req, res) {
     }
 
     // ============================================================
-    // CALENDAR ROUTE
-    // ============================================================
-
-    // GET /api/calendar
-    if (path === '/api/calendar' && method === 'GET') {
-      if (!currentUser) return authError(res);
-
-      const events = await mongoDb.collection('activities')
-        .find({
-          assignedTo: currentUser._id,
-          isActive: true,
-          scheduledDate: { $exists: true, $ne: null }
-        })
-        .project({ title: 1, scheduledDate: 1, scheduledTime: 1, section: 1, status: 1 })
-        .sort({ scheduledDate: 1 })
-        .limit(30).toArray();
-
-      return res.json({ success: true, data: events });
-    }
-
-    // ============================================================
     // SCHOOL SUB-ROUTES
     // ============================================================
 

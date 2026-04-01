@@ -140,7 +140,7 @@ router.get('/', protect, async (req, res) => {
       }
     }
 
-    res.json({ success: true, data: events, _debug: { role: req.user.role, userId: req.user._id?.toString() } });
+    res.json({ success: true, data: events });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
