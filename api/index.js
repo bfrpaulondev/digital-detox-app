@@ -1219,20 +1219,23 @@ module.exports = async function handler(req, res) {
         };
 
         try {
-          // Fetch image as base64 from URL
+          // Fetch image as base64 from Cloudinary URL
           const axios = require('axios');
           const imageResponse = await axios.get(photo.filePath, { responseType: 'arraybuffer', timeout: 15000 });
           const base64Image = Buffer.from(imageResponse.data).toString('base64');
-          const mimeType = 'image/jpeg';
+          const mimeType = photo.filePath.includes('.png') ? 'image/png' : 'image/jpeg';
 
-          // Use VLM to analyze the photo
-          const ZAI = require('z-ai-web-dev-sdk');
-          const zai = await ZAI.create();
-          const completion = await zai.chat.completions.create({
+          // Use OpenAI GPT-4o Vision to analyze the photo
+          const OpenAI = require('openai');
+          const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
+          const completion = await openai.chat.completions.create({
+            model: 'gpt-4o',
+            max_tokens: 500,
             messages: [
               {
                 role: 'system',
-                content: 'You are a photo verification assistant for a children\'s digital detox app. Analyze photos to determine if they show real offline activities. Respond ONLY in valid JSON format with these exact fields: { "isOutdoor": boolean, "isActivityRelated": boolean, "isScreenCapture": boolean, "appearsReal": boolean, "description": "short description in Portuguese", "confidence": 0-100, "status": "approved" or "rejected" or "pending_review", "flaggedIssues": ["array of issues"] }. Rules: isScreenCapture=true if photo shows a phone/tablet/computer screen, screenshot, or digital content. appearsReal=false if photo looks like it was taken from the internet, is a stock photo, or is digitally manipulated. status="rejected" if isScreenCapture=true or appearsReal=false. status="approved" if isActivityRelated=true and appearsReal=true and confidence>=60. Otherwise status="pending_review".'
+                content: 'You are a photo verification assistant for a children\'s digital detox app called "Digital Detox". You analyze photos sent by children (ages 10-14) to prove they did offline activities (sports, reading, nature, art, cooking, board games, etc). Respond ONLY with valid JSON, no markdown, no extra text. JSON fields: { "isOutdoor": boolean, "isActivityRelated": boolean, "isScreenCapture": boolean, "appearsReal": boolean, "description": "short description in Portuguese (max 80 chars)", "confidence": number 0-100, "status": "approved" or "rejected" or "pending_review", "flaggedIssues": ["array of strings"] }. Rules: (1) isScreenCapture=true ONLY if the image clearly shows a phone/tablet/computer screen, screenshot, TV, or game interface. (2) appearsReal=false if the photo looks like a stock photo, downloaded image, or is obviously AI-generated. (3) status="rejected" if isScreenCapture=true OR appearsReal=false. (4) status="approved" if isActivityRelated=true AND appearsReal=true AND confidence>=60. (5) Otherwise status="pending_review". (6) flaggedIssues should list specific problems found. Be fair - children take photos with phones so slight blur or imperfect framing is OK.'
               },
               {
                 role: 'user',
@@ -1243,7 +1246,7 @@ module.exports = async function handler(req, res) {
                   },
                   {
                     type: 'text',
-                    text: 'Analise esta foto e determine: 1) Se parece ser uma foto real tirada pelo utilizador (nao da internet) 2) Se mostra uma atividade offline (desporto, leitura, natureza, arte, culinaria, etc) 3) Se contem capturas de ecrã de telemóvel/computador 4) Se há indícios de manipulação digital. Responda em JSON.'
+                    text: 'Analyze this photo from a child doing a "digital detox" activity. Determine: 1) Does it show a real offline activity (sports, reading, nature, art, cooking, board games, family time, etc)? 2) Does it contain any screen captures (phone, TV, computer, game)? 3) Does it look like a real photo taken by the child (not from internet/AI)? Respond in JSON only.'
                   }
                 ]
               }
@@ -1251,10 +1254,22 @@ module.exports = async function handler(req, res) {
           });
 
           const responseText = completion.choices[0]?.message?.content || '';
-          // Parse JSON from response
-          const jsonMatch = responseText.match(/\{[\s\S]*\}/);
+          // Parse JSON from response (strip markdown if present)
+          const cleanText = responseText.replace(/```json?\n?/g, '').trim();
+          const jsonMatch = cleanText.match(/\{[\s\S]*\}/);
           if (jsonMatch) {
-            analysis = JSON.parse(jsonMatch[0]);
+            const parsed = JSON.parse(jsonMatch[0]);
+            // Validate required fields
+            analysis = {
+              isOutdoor: Boolean(parsed.isOutdoor),
+              isActivityRelated: Boolean(parsed.isActivityRelated),
+              isScreenCapture: Boolean(parsed.isScreenCapture),
+              appearsReal: Boolean(parsed.appearsReal),
+              description: String(parsed.description || '').substring(0, 120),
+              confidence: Math.min(100, Math.max(0, Number(parsed.confidence) || 0)),
+              status: ['approved', 'rejected', 'pending_review'].includes(parsed.status) ? parsed.status : 'pending_review',
+              flaggedIssues: Array.isArray(parsed.flaggedIssues) ? parsed.flaggedIssues : []
+            };
           }
           console.log('[AI ANALYSIS]', JSON.stringify(analysis));
         } catch (aiError) {
