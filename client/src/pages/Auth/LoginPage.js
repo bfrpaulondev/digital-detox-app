@@ -4,7 +4,7 @@ import {
   Container, Box, Typography, TextField, Button, Alert, Link,
   InputAdornment, IconButton, Paper
 } from '@mui/material';
-import { Visibility, VisibilityOff, Pets } from '@mui/icons-material';
+import { Visibility, VisibilityOff } from '@mui/icons-material';
 import { useAuth } from '../../context/AuthContext';
 
 const LoginPage = () => {
@@ -55,7 +55,12 @@ const LoginPage = () => {
           borderBottomRightRadius: 32
         }}
       >
-        <Pets sx={{ fontSize: 60, mb: 1 }} />
+        <Box
+          component="img"
+          src={process.env.PUBLIC_URL + '/app-logo.png'}
+          alt="OFFOUT"
+          sx={{ width: 120, height: 120, borderRadius: '50%', mb: 1.5, boxShadow: '0 4px 20px rgba(0,0,0,0.15)' }}
+        />
         <Typography variant="h4" fontWeight={800}>
           OFFOUT
         </Typography>

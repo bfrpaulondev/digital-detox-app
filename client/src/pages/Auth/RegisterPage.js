@@ -139,6 +139,12 @@ const RegisterPage = () => {
           borderBottomRightRadius: 24
         }}
       >
+        <Box
+          component="img"
+          src={process.env.PUBLIC_URL + '/app-logo.png'}
+          alt="OFFOUT"
+          sx={{ width: 80, height: 80, borderRadius: '50%', mb: 1 }}
+        />
         <Typography variant="h5" fontWeight={800}>Criar Conta</Typography>
         <Typography variant="body2" sx={{ opacity: 0.9, mt: 0.5 }}>
           Junte-se ao OFFOUT

@@ -44,13 +44,21 @@ const AppHeader = ({ title, showBack, showNotifications, showProfile, notificati
             {title}
           </Typography>
         ) : (
-          <Box sx={{ flex: 1 }}>
-            <Typography variant="h6" noWrap sx={{ fontWeight: 700, color: 'primary.main' }}>
-              OFFOUT
-            </Typography>
-            <Typography variant="caption" color="text.secondary">
-              {roleLabels[user?.role]}
-            </Typography>
+          <Box sx={{ flex: 1, display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Box
+              component="img"
+              src={process.env.PUBLIC_URL + '/header-logo.png'}
+              alt="OFFOUT"
+              sx={{ width: 36, height: 36, borderRadius: '50%' }}
+            />
+            <Box>
+              <Typography variant="h6" noWrap sx={{ fontWeight: 700, color: 'primary.main', lineHeight: 1.2 }}>
+                OFFOUT
+              </Typography>
+              <Typography variant="caption" color="text.secondary">
+                {roleLabels[user?.role]}
+              </Typography>
+            </Box>
           </Box>
         )}
 
