@@ -1,60 +1,94 @@
-// Digital Detox PWA Service Worker v4
-// Strategy: Network-first for everything, minimal cache
-const CACHE_NAME = 'digital-detox-v4';
-const STATIC_ASSETS = [
+// OFFOUT PWA Service Worker v5
+// Strategy: Cache-first for app shell, network-first for API
+const CACHE_NAME = 'offout-v5';
+
+// App shell - files needed for offline installability
+const APP_SHELL = [
   '/',
   '/index.html',
-  '/manifest.json'
+  '/manifest.json',
+  '/icons/icon-192x192.png',
+  '/icons/icon-512x512.png'
 ];
 
-// Nothing gets cached except bare minimum HTML
-function shouldCache(url) {
-  if (url.includes('/api/')) return false;
-  const pathname = new URL(url).pathname;
-  // Only cache index.html root
-  return pathname === '/' || pathname === '/index.html';
-}
-
-// Install - minimal
+// Install - cache app shell
 self.addEventListener('install', (event) => {
+  event.waitUntil(
+    caches.open(CACHE_NAME).then((cache) => {
+      return cache.addAll(APP_SHELL).catch(() => {
+        // Ignore individual failures during install
+        console.log('Some app shell files failed to cache during install');
+      });
+    })
+  );
   self.skipWaiting();
 });
 
-// Activate - delete ALL old caches
+// Activate - clean old caches
 self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.keys().then((names) => Promise.all(names.map(n => caches.delete(n))))
+    caches.keys().then((names) => 
+      Promise.all(
+        names.filter((name) => name !== CACHE_NAME).map((name) => caches.delete(name))
+      )
+    )
   );
   self.clients.claim();
-  // Force all clients to reload
-  self.clients.matchAll().then((clients) => {
-    clients.forEach((client) => client.postMessage({ type: 'SW_UPDATED', v: 4 }));
-  });
 });
 
-// Fetch - network always
+// Fetch - cache-first for static assets, network-first for API
 self.addEventListener('fetch', (event) => {
-  if (event.request.method !== 'GET') return;
-  if (event.request.url.includes('/api/')) return;
+  const { request } = event;
+  const url = new URL(request.url);
 
-  // JS/CSS never cached
-  const pathname = new URL(event.request.url).pathname;
-  const noCache = ['.js', '.css', '.json', '.woff', '.woff2', '.ttf', '.svg'].some(ext => pathname.endsWith(ext));
+  // Skip non-GET requests
+  if (request.method !== 'GET') return;
 
-  if (noCache) {
-    event.respondWith(fetch(event.request).catch(() => new Response('Offline', { status: 503 })));
+  // Skip API calls
+  if (url.pathname.startsWith('/api/')) return;
+
+  // For navigation requests (HTML pages) - network first, fall back to cache
+  if (request.mode === 'navigate') {
+    event.respondWith(
+      fetch(request)
+        .then((response) => {
+          const clone = response.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
+          return response;
+        })
+        .catch(() => caches.match('/index.html'))
+    );
     return;
   }
 
-  event.respondWith(
-    fetch(event.request)
-      .then((res) => {
-        if (res.status === 200 && shouldCache(event.request.url)) {
-          const clone = res.clone();
-          caches.open(CACHE_NAME).then(c => c.put(event.request, clone));
-        }
-        return res;
+  // For static assets (JS, CSS, images, fonts) - stale-while-revalidate
+  if (url.pathname.match(/\.(js|css|png|jpg|jpeg|gif|svg|ico|woff|woff2|ttf|eot)$/)) {
+    event.respondWith(
+      caches.match(request).then((cached) => {
+        const fetchPromise = fetch(request).then((response) => {
+          if (response.ok) {
+            const clone = response.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
+          }
+          return response;
+        }).catch(() => cached);
+
+        return cached || fetchPromise;
       })
-      .catch(() => caches.match(event.request).then(r => r || new Response('Offline', { status: 503 })))
+    );
+    return;
+  }
+
+  // For everything else - network first
+  event.respondWith(
+    fetch(request)
+      .then((response) => {
+        if (response.ok) {
+          const clone = response.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
+        }
+        return response;
+      })
+      .catch(() => caches.match(request))
   );
 });
