@@ -1,6 +1,6 @@
 {
-  "short_name": "DigitalDetox",
-  "name": "Digital Detox - Combate ao Vício Digital",
+  "short_name": "OFFOUT",
+  "name": "OFFOUT",
   "description": "Incentive atividades offline, cuide do seu animal virtual e reduza o tempo de ecrã",
   "icons": [
     {
@@ -54,7 +54,7 @@
   ],
   "start_url": ".",
   "display": "standalone",
-  "theme_color": "#6C63FF",
+  "theme_color": "#FF9800",
   "background_color": "#F5F7FA",
   "orientation": "portrait",
   "scope": "/",

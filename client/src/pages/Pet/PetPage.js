@@ -270,7 +270,7 @@ const PetPage = () => {
             <LinearProgress
               variant="determinate"
               value={pet ? (pet.experience / pet.experienceToNextLevel) * 100 : 0}
-              sx={{ height: 8, borderRadius: 4, mt: 0.5, bgcolor: '#E8EAF6' }}
+              sx={{ height: 8, borderRadius: 4, mt: 0.5, bgcolor: '#FFF3E0' }}
             />
           </Box>
         </Card>

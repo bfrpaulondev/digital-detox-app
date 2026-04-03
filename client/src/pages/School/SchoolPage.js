@@ -59,9 +59,9 @@ function CustomTabBar({ tabs, activeTab, onTabChange }) {
             borderBottom: isActive ? '3px solid' : '3px solid transparent',
             borderColor: isActive ? 'primary.main' : 'transparent',
             color: isActive ? 'primary.main' : 'text.secondary',
-            bgcolor: isActive ? 'rgba(108, 99, 255, 0.06)' : 'transparent',
+            bgcolor: isActive ? 'rgba(255, 152, 0, 0.06)' : 'transparent',
             fontWeight: isActive ? 700 : 400, fontSize: '0.75rem',
-            transition: 'all 0.2s ease', '&:active': { bgcolor: 'rgba(108, 99, 255, 0.12)' }
+            transition: 'all 0.2s ease', '&:active': { bgcolor: 'rgba(255, 152, 0, 0.12)' }
           }}>
             {tab.icon}
             <Typography variant="caption" sx={{ fontWeight: 'inherit', fontSize: '0.7rem' }}>{tab.label}</Typography>
@@ -185,11 +185,11 @@ const TeacherCalendar = ({ enqueueSnackbar }) => {
               onClick={() => handleDateClick(day)}
               sx={{
                 p: 0.5, minHeight: 52, cursor: 'pointer', position: 'relative',
-                bgcolor: isToday ? '#E8EAF6' : hasMissions ? '#FFF8E1' : 'white',
-                border: isToday ? '2px solid #6C63FF' : '1px solid',
-                borderColor: isToday ? '#6C63FF' : 'divider',
+                bgcolor: isToday ? '#FFF3E0' : hasMissions ? '#FFF8E1' : 'white',
+                border: isToday ? '2px solid #FF9800' : '1px solid',
+                borderColor: isToday ? '#FF9800' : 'divider',
                 borderRadius: 1.5, transition: 'all 0.15s ease',
-                '&:hover': { bgcolor: isToday ? '#C5CAE9' : '#F5F5F5', transform: 'scale(1.02)' }
+                '&:hover': { bgcolor: isToday ? '#FFE0B2' : '#F5F5F5', transform: 'scale(1.02)' }
               }}
             >
               <Typography variant="caption" fontWeight={isToday ? 800 : 500} color={isToday ? 'primary.main' : 'text.secondary'}>

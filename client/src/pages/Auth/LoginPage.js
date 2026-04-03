@@ -57,7 +57,7 @@ const LoginPage = () => {
       >
         <Pets sx={{ fontSize: 60, mb: 1 }} />
         <Typography variant="h4" fontWeight={800}>
-          Digital Detox
+          OFFOUT
         </Typography>
         <Typography variant="body1" sx={{ opacity: 0.9, mt: 1 }}>
           Combate o vício digital de forma divertida!

@@ -97,6 +97,14 @@ const squishAnim = keyframes`
   50% { transform: scaleX(0.95) scaleY(1.05); }
   75% { transform: scaleX(1.04) scaleY(0.96); }
 `;
+const blinkAnim = keyframes`
+  0%, 90%, 100% { transform: scaleY(1); }
+  95% { transform: scaleY(0.1); }
+`;
+const pawWaveAnim = keyframes`
+  0%, 100% { transform: rotate(-15deg) translateY(-8px); }
+  50% { transform: rotate(15deg) translateY(-12px); }
+`;
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // CONFIG
@@ -307,6 +315,18 @@ const Crown = ({ x, y, s }) => (
 // HELPER: get animation for pet wrapper
 // ═══════════════════════════════════════════════════════════════════════════════
 
+const useBlink = () => {
+  const [blinking, setBlinking] = useState(false);
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setBlinking(true);
+      setTimeout(() => setBlinking(false), 200);
+    }, 3500 + Math.random() * 2000);
+    return () => clearInterval(interval);
+  }, []);
+  return blinking;
+};
+
 const getPetAnim = (mood, interaction) => {
   if (interaction === 'play') return excitedAnim;
   if (interaction === 'feed') return eatBob;
@@ -379,6 +399,7 @@ const BabyPetSVG = ({ species, mood, size, interaction }) => {
   const anim = getPetAnim(mood, interaction);
   const isPetting = interaction === 'pet';
   const isPlaying = interaction === 'play';
+  const blinking = useBlink();
 
   // Common baby proportions: HEAD DOMINANT
   const H = 100; // head center Y (big head area)
@@ -582,6 +603,13 @@ const BabyPetSVG = ({ species, mood, size, interaction }) => {
       {/* Paws */}
       {renderPaws()}
       {renderBirdLegs()}
+      {/* Waving paw for happy dog */}
+      {species === 'cao' && isHappy && (
+        <g style={{ transformOrigin: `${60 + 14}px ${BY + BRY - 3}px`, animation: `${pawWaveAnim} 0.6s ease-in-out infinite` }}>
+          <ellipse cx={60 + 14} cy={BY + BRY - 12} rx="7" ry="5" fill={c.secondary} />
+          <ellipse cx={60 + 14} cy={BY + BRY - 17} rx="5" ry="3" fill={c.primary} />
+        </g>
+      )}
 
       {/* HEAD - THE STAR */}
       <circle cx="60" cy={H} r={HR} fill={`url(#baby-head-${species})`} />
@@ -609,7 +637,7 @@ const BabyPetSVG = ({ species, mood, size, interaction }) => {
             <path d={`M${60 + 4},${H - 2} Q${60 + 14},${H - 9} ${60 + 20},${H - 2}`}
               stroke="#555" strokeWidth="2.5" fill="none" strokeLinecap="round" />
           ) : (
-            <KawaiiEye cx={60 + 14} cy={H - 2} r={eyeR} closed={false} big={isExcited} irisColor={c.iris} mood={mood} />
+            <KawaiiEye cx={60 + 14} cy={H - 2} r={eyeR} closed={species === 'cao' && blinking} big={isExcited} irisColor={c.iris} mood={mood} />
           )}
           {/* Tongue for happy dog */}
           {isHappy && species === 'cao' && (
@@ -650,6 +678,7 @@ const YoungPetSVG = ({ species, mood, stage, size, interaction }) => {
   const isPlaying = interaction === 'play';
   const isHappy = mood === 'feliz' || mood === 'brincalhao';
   const isExcited = mood === 'energico' || isPlaying;
+  const blinking = useBlink();
 
   const scl = isAdult ? 1.0 : 0.9;
   const HR = 28 * scl;
@@ -741,6 +770,13 @@ const YoungPetSVG = ({ species, mood, stage, size, interaction }) => {
           <ellipse cx={70 + bodyRx * 0.4} cy={bodyY + bodyRy - 3} rx={8 * scl} ry="5" fill={c.secondary} />
         </g>
       )}
+      {/* Waving paw for happy dog */}
+      {species === 'cao' && (isHappy || isExcited) && (
+        <g style={{ transformOrigin: `${70 + bodyRx * 0.4}px ${bodyY + bodyRy - 3}px`, animation: `${pawWaveAnim} 0.6s ease-in-out infinite` }}>
+          <ellipse cx={70 + bodyRx * 0.4} cy={bodyY + bodyRy - 12} rx={7 * scl} ry="5" fill={c.secondary} />
+          <ellipse cx={70 + bodyRx * 0.4} cy={bodyY + bodyRy - 17} rx={5 * scl} ry="3" fill={c.primary} />
+        </g>
+      )}
 
       {/* Head */}
       <circle cx="70" cy={headY} r={HR} fill={`url(#young-head-${species}-${stage})`} />
@@ -798,7 +834,7 @@ const YoungPetSVG = ({ species, mood, stage, size, interaction }) => {
       ) : (
         <g>
           <KawaiiEye cx={70 - 14} cy={headY - 2} r={eyeR} closed={false} big={isExcited} irisColor={c.iris} mood={mood} />
-          <KawaiiEye cx={70 + 14} cy={headY - 2} r={eyeR} closed={false} big={isExcited} irisColor={c.iris} mood={mood} />
+          <KawaiiEye cx={70 + 14} cy={headY - 2} r={eyeR} closed={species === 'cao' && blinking} big={isExcited} irisColor={c.iris} mood={mood} />
         </g>
       )}
 

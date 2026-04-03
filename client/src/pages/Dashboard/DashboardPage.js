@@ -83,7 +83,7 @@ const DashboardPage = () => {
   const StudentDashboard = () => (
     <>
       {/* Welcome Card */}
-      <Card sx={{ mb: 2, background: 'linear-gradient(135deg, #6C63FF 0%, #4A42CC 100%)', color: 'white' }}>
+      <Card sx={{ mb: 2, background: 'linear-gradient(135deg, #FF9800 0%, #F57C00 100%)', color: 'white' }}>
         <CardContent sx={{ p: 3 }}>
           <Typography variant="h5" fontWeight={700}>
             Olá, {user?.fullName?.split(' ')[0]}! 👋

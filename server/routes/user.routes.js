@@ -61,7 +61,7 @@ router.get('/profile/:id', protect, async (req, res) => {
 // @desc    Update user profile
 router.put('/profile/:id', protect, async (req, res) => {
   try {
-    const { fullName, phone, activityPreferences, maxScreenTimeHours, sleepTime, workSchedule } = req.body;
+    const { fullName, phone, activityPreferences, maxScreenTimeHours, sleepTime, workSchedule, school } = req.body;
 
     const updateData = {};
     if (fullName) updateData.fullName = fullName;
@@ -70,6 +70,18 @@ router.put('/profile/:id', protect, async (req, res) => {
     if (maxScreenTimeHours) updateData.maxScreenTimeHours = maxScreenTimeHours;
     if (sleepTime) updateData.sleepTime = sleepTime;
     if (workSchedule) updateData.workSchedule = workSchedule;
+
+    // Allow students to change school
+    if (school && req.user.role === 'student') {
+      const School = require('../models/School');
+      const mongoose = require('mongoose');
+      let schoolId = school;
+      if (!mongoose.Types.ObjectId.isValid(school)) {
+        const schoolDoc = await School.findOne({ code: school.toUpperCase() });
+        schoolId = schoolDoc ? schoolDoc._id : null;
+      }
+      if (schoolId) updateData.school = schoolId;
+    }
 
     // Only allow users to update their own profile (or parent to update child)
     if (req.user.role === 'parent') {

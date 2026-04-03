@@ -1456,9 +1456,16 @@ module.exports = async function handler(req, res) {
       for (const field of allowedFields) {
         if (body[field] !== undefined) updateFields[field] = body[field];
       }
-      // Convert school to ObjectId if it looks like one
-      if (updateFields.school && typeof updateFields.school === 'string' && mongoose.Types.ObjectId.isValid(updateFields.school)) {
-        updateFields.school = new mongoose.Types.ObjectId(updateFields.school);
+      // Convert school code to ObjectId if needed
+      if (updateFields.school && typeof updateFields.school === 'string') {
+        if (mongoose.Types.ObjectId.isValid(updateFields.school)) {
+          updateFields.school = new mongoose.Types.ObjectId(updateFields.school);
+        } else {
+          // Resolve school code to ObjectId
+          const schoolDoc = await mongoDb.collection('schools').findOne({ code: updateFields.school.toUpperCase() });
+          if (schoolDoc) updateFields.school = schoolDoc._id;
+          else delete updateFields.school;
+        }
       }
       updateFields.updatedAt = new Date();
 

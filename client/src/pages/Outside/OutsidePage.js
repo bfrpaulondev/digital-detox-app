@@ -733,10 +733,10 @@ const OutsidePage = () => {
               borderBottom: tab === i ? '3px solid' : '3px solid transparent',
               borderColor: tab === i ? 'primary.main' : 'transparent',
               color: tab === i ? 'primary.main' : 'text.secondary',
-              bgcolor: tab === i ? 'rgba(108, 99, 255, 0.06)' : 'transparent',
+              bgcolor: tab === i ? 'rgba(255, 152, 0, 0.06)' : 'transparent',
               fontWeight: tab === i ? 700 : 400, fontSize: '0.8rem',
               transition: 'all 0.2s ease',
-              '&:active': { bgcolor: 'rgba(108, 99, 255, 0.12)' }
+              '&:active': { bgcolor: 'rgba(255, 152, 0, 0.12)' }
             }}
           >
             {t.icon}
@@ -761,7 +761,7 @@ const OutsidePage = () => {
                 Tire uma foto que prove que fez a atividade. A foto NÃO deve conter rostos.
               </Typography>
               {selectedActivity && (
-                <Paper sx={{ p: 2, mb: 2, bgcolor: '#E8EAF6' }}>
+                <Paper sx={{ p: 2, mb: 2, bgcolor: '#FFF3E0' }}>
                   <Typography variant="body2" fontWeight={600}>{selectedActivity.title}</Typography>
                   <Typography variant="caption">{selectedActivity.pointsValue} pontos</Typography>
                 </Paper>

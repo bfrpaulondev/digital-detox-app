@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import {
   Box, Typography, Card, CardContent, TextField, Button, Avatar,
-  Chip, List, ListItem, ListItemIcon, ListItemText, Grid
+  Chip, List, ListItem, ListItemIcon, ListItemText, Grid, MenuItem
 } from '@mui/material';
-import { Email, CalendarToday, Phone, Edit, Save } from '@mui/icons-material';
+import { Email, CalendarToday, Phone, Edit, Save, School as SchoolIcon } from '@mui/icons-material';
 import { useAuth } from '../../context/AuthContext';
 import AppHeader from '../../components/layout/AppHeader';
-import { userAPI } from '../../services/api';
+import { userAPI, schoolAPI } from '../../services/api';
 
 const ProfilePage = () => {
   const { user, updateUser } = useAuth();
@@ -14,10 +14,18 @@ const ProfilePage = () => {
   const [form, setForm] = useState({ fullName: '', phone: '' });
   const [parentCode, setParentCode] = useState('');
   const [linking, setLinking] = useState(false);
+  const [schools, setSchools] = useState([]);
+  const [changingSchool, setChangingSchool] = useState(false);
+  const [selectedSchool, setSelectedSchool] = useState('');
 
   useEffect(() => {
     if (user) {
       setForm({ fullName: user.fullName || '', phone: user.phone || '' });
+      if (user.role === 'student') {
+        schoolAPI.getAll().then(res => {
+          if (res.data?.success) setSchools(res.data.data || []);
+        }).catch(() => {});
+      }
     }
   }, [user]);
 
@@ -103,7 +111,7 @@ const ProfilePage = () => {
               <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
                 Partilhe este código com o seu pai/mãe:
               </Typography>
-              <Box sx={{ p: 2, bgcolor: '#E8EAF6', borderRadius: 2, textAlign: 'center' }}>
+              <Box sx={{ p: 2, bgcolor: '#FFF3E0', borderRadius: 2, textAlign: 'center' }}>
                 <Typography variant="h4" fontWeight={800} color="primary.main" letterSpacing={2}>
                   {user.parentCode}
                 </Typography>
@@ -140,6 +148,54 @@ const ProfilePage = () => {
                     </ListItem>
                   ))}
                 </List>
+              )}
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Change School (for students) */}
+        {user?.role === 'student' && (
+          <Card sx={{ mb: 2 }}>
+            <CardContent>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5 }}>
+                <SchoolIcon color="primary" />
+                <Typography variant="h6" fontWeight={600}>Mudar de Escola</Typography>
+              </Box>
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
+                Podes mudar para a escola do teu professor. Insere o código da escola.
+              </Typography>
+              {changingSchool ? (
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+                  <TextField
+                    fullWidth
+                    select
+                    size="small"
+                    label="Nova Escola"
+                    value={selectedSchool}
+                    onChange={(e) => setSelectedSchool(e.target.value)}
+                  >
+                    {schools.map(s => (
+                      <MenuItem key={s._id || s.code} value={s.code}>{s.name}</MenuItem>
+                    ))}
+                  </TextField>
+                  <Box sx={{ display: 'flex', gap: 1 }}>
+                    <Button size="small" variant="contained" disabled={!selectedSchool} onClick={async () => {
+                      try {
+                        const res = await userAPI.updateProfile(user._id, { school: selectedSchool });
+                        if (res.data?.success) {
+                          updateUser(res.data.data);
+                          setChangingSchool(false);
+                          setSelectedSchool('');
+                        }
+                      } catch (e) { console.error(e); }
+                    }}>Confirmar</Button>
+                    <Button size="small" onClick={() => { setChangingSchool(false); setSelectedSchool(''); }}>Cancelar</Button>
+                  </Box>
+                </Box>
+              ) : (
+                <Button size="small" variant="outlined" startIcon={<SchoolIcon />} onClick={() => setChangingSchool(true)}>
+                  Alterar Escola
+                </Button>
               )}
             </CardContent>
           </Card>

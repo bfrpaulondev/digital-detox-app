@@ -141,7 +141,7 @@ const RegisterPage = () => {
       >
         <Typography variant="h5" fontWeight={800}>Criar Conta</Typography>
         <Typography variant="body2" sx={{ opacity: 0.9, mt: 0.5 }}>
-          Junte-se ao Digital Detox
+          Junte-se ao OFFOUT
         </Typography>
       </Box>
 
@@ -261,7 +261,7 @@ const RegisterPage = () => {
               )}
 
               {formData.role === 'parent' && (
-                <TextField fullWidth label="Código do Filho(a) (para crianças 10-14 anos)" name="parentCode" value={formData.parentCode} onChange={handleChange} sx={{ mb: 2 }} helperText="Peça o código ao seu filho(a) após o registo dele" />
+                <TextField fullWidth label="Código do Filho(a) (apenas para 10-13 anos)" name="parentCode" value={formData.parentCode} onChange={handleChange} sx={{ mb: 2 }} helperText="Alunos de 14+ anos são autónomos e não precisam de supervisão parental" />
               )}
             </Box>
           )}

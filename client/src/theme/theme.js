@@ -3,16 +3,16 @@ import { createTheme } from '@mui/material/styles';
 const theme = createTheme({
   palette: {
     primary: {
-      main: '#6C63FF',
-      light: '#9D97FF',
-      dark: '#4A42CC',
+      main: '#FF9800',
+      light: '#FFB74D',
+      dark: '#F57C00',
       contrastText: '#FFFFFF'
     },
     secondary: {
-      main: '#FF6584',
-      light: '#FF8FA3',
-      dark: '#CC5069',
-      contrastText: '#FFFFFF'
+      main: '#FFD700',
+      light: '#FFE44D',
+      dark: '#DAA520',
+      contrastText: '#333333'
     },
     success: {
       main: '#4CAF50',
@@ -20,9 +20,9 @@ const theme = createTheme({
       dark: '#388E3C'
     },
     warning: {
-      main: '#FF9800',
-      light: '#FFB74D',
-      dark: '#F57C00'
+      main: '#FF6F00',
+      light: '#FF9E40',
+      dark: '#E65100'
     },
     error: {
       main: '#F44336',
@@ -30,7 +30,7 @@ const theme = createTheme({
       dark: '#D32F2F'
     },
     background: {
-      default: '#F5F7FA',
+      default: '#FFF8F0',
       paper: '#FFFFFF'
     },
     text: {
@@ -38,9 +38,9 @@ const theme = createTheme({
       secondary: '#718096'
     },
     school: {
-      main: '#2196F3',
-      light: '#64B5F6',
-      dark: '#1976D2'
+      main: '#FF9800',
+      light: '#FFB74D',
+      dark: '#F57C00'
     },
     pet: {
       main: '#FF9800',
@@ -104,9 +104,9 @@ const theme = createTheme({
           fontSize: '0.9375rem'
         },
         contained: {
-          boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+          boxShadow: '0 4px 12px rgba(255,152,0,0.25)',
           '&:hover': {
-            boxShadow: '0 6px 16px rgba(0,0,0,0.2)'
+            boxShadow: '0 6px 16px rgba(255,152,0,0.35)'
           }
         }
       }
@@ -158,7 +158,7 @@ const theme = createTheme({
           minWidth: 'auto',
           padding: '6px 0',
           '&.Mui-selected': {
-            color: '#6C63FF'
+            color: '#FF9800'
           }
         }
       }
@@ -166,7 +166,7 @@ const theme = createTheme({
     MuiAppBar: {
       styleOverrides: {
         root: {
-          boxShadow: '0 2px 8px rgba(0,0,0,0.08)'
+          boxShadow: '0 2px 8px rgba(255,152,0,0.1)'
         }
       }
     }

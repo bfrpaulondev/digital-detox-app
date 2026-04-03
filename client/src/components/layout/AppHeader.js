@@ -46,7 +46,7 @@ const AppHeader = ({ title, showBack, showNotifications, showProfile, notificati
         ) : (
           <Box sx={{ flex: 1 }}>
             <Typography variant="h6" noWrap sx={{ fontWeight: 700, color: 'primary.main' }}>
-              Digital Detox
+              OFFOUT
             </Typography>
             <Typography variant="caption" color="text.secondary">
               {roleLabels[user?.role]}

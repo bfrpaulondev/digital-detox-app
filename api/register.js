@@ -114,9 +114,11 @@ module.exports = async function handler(req, res) {
       userData.studentNumber = studentNumber;
       userData.grade = grade;
 
+      // Generate parent code ONLY for children 10-13 (under 14 = not autonomous)
+      // Students 14+ are autonomous — no parent supervision needed
       const birthDate = new Date(dateOfBirth);
       const age = Math.floor((new Date() - birthDate) / (365.25 * 24 * 60 * 60 * 1000));
-      if (age >= 10 && age <= 14) {
+      if (age >= 10 && age < 14) {
         userData.parentCode = uuidv4().substring(0, 8).toUpperCase();
       }
     }

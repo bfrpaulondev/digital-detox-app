@@ -77,7 +77,7 @@ const NotificationsPage = () => {
               <React.Fragment key={notif._id}>
                 <ListItemButton
                   sx={{
-                    bgcolor: notif.isRead ? 'transparent' : '#E8EAF6',
+                    bgcolor: notif.isRead ? 'transparent' : '#FFF3E0',
                     borderRadius: 2,
                     mb: 1
                   }}

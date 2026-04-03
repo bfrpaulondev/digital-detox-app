@@ -97,10 +97,10 @@ const RankingPage = () => {
             <ListItem
               key={student._id}
               sx={{
-                bgcolor: student.isCurrentUser ? '#E8EAF6' : 'transparent',
+                bgcolor: student.isCurrentUser ? '#FFF3E0' : 'transparent',
                 borderRadius: 2,
                 mb: 0.5,
-                border: student.isCurrentUser ? '2px solid #6C63FF' : 'none'
+                border: student.isCurrentUser ? '2px solid #FF9800' : 'none'
               }}
             >
               <ListItemIcon sx={{ minWidth: 40 }}>
