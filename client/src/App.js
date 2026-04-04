@@ -6,6 +6,7 @@ import { SnackbarProvider } from 'notistack';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import theme from './theme/theme';
 import LoadingSpinner from './components/common/LoadingSpinner';
+import InstallPrompt from './components/common/InstallPrompt';
 import BottomNav from './components/layout/BottomNav';
 
 // Lazy load pages
@@ -66,6 +67,7 @@ const AppContent = () => {
           <Route path="*" element={<Navigate to={isAuthenticated ? "/dashboard" : "/login"} />} /> />
         </Routes>
       </Suspense>
+      <InstallPrompt />
       {isAuthenticated && <BottomNav />}
     </Router>
   );
